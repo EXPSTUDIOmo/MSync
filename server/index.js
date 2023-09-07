@@ -70,7 +70,7 @@ function setStartTime()
   START_TIME = Date.now();
   bStartTimeSet = true;
 
-  clients.forEach((value, key, map) => {
+  clients.forEach((value) => {
     value.emit('starttime', START_TIME);
   });
 }

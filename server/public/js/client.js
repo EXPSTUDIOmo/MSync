@@ -47,6 +47,7 @@ socket.on('start', () => {
 socket.on('stop', () => {
     clearInterval(SYNC_INTERVAL);
     scheduler.postMessage({id: "stop"});
+    SOUNDS[0].stop();
 });
 
 socket.on('color', (R,G,B) => {
@@ -173,32 +174,42 @@ function loadEvents(voiceid)
 
 function loadSounds(voiceid)
 {
-    let numSounds = 9;
 
-    if(voiceid == 2)
-        numSounds = 10;
-    else if(voiceid == 3)
-        numSounds = 12;
-    else if(voiceid == 4)
-        numSounds = 11;
-    else if(voiceid == 5)
-        numSounds = 10;
-    else if(voiceid == 6)
-        numSounds = 11;
-    else if(voiceid == 7)
-        numSounds = 9;
+    SOUNDS[0] = new Howl({
+                src: [`Samples/EoT/EOTM_2.mp3`]
+            });
 
-    for(let i = 0; i < numSounds; ++i)
-    {
-        SOUNDS.push(new Howl({
-            src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_${i}.mp3`]
-        }));
-    }
+    SOUNDS[1] = new Howl({
+        src: [`Samples/EoT/EOTM_silence.mp3`]
+    });
+     
+
+    // let numSounds = 9;
+
+    // if(voiceid == 2)
+    //     numSounds = 10;
+    // else if(voiceid == 3)
+    //     numSounds = 12;
+    // else if(voiceid == 4)
+    //     numSounds = 11;
+    // else if(voiceid == 5)
+    //     numSounds = 10;
+    // else if(voiceid == 6)
+    //     numSounds = 11;
+    // else if(voiceid == 7)
+    //     numSounds = 9;
+
+    // for(let i = 0; i < numSounds; ++i)
+    // {
+    //     SOUNDS.push(new Howl({
+    //         src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_${i}.mp3`]
+    //     }));
+    // }
     
 
-    SOUNDS.push(new Howl({
-        src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_99.mp3`],
-    }));
+    // SOUNDS.push(new Howl({
+    //     src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_99.mp3`],
+    // }));
 }
 
 
@@ -238,16 +249,22 @@ function handleEvent(schedulerEvent)
 
         if(schedulerEvent.sound == -2)
         {
-            SOUNDS[SOUNDS.length - 1].play();
+            SOUNDS[1].play();
+            SOUNDS[1].volume(0);
+            SOUNDS[0].volume(0);
         }
+
+        else if(schedulerEvent.sound == -1)
+        {
+            SOUNDS[0].fade(1,0,100);
+        }
+
     }
 
     else
     {
         let sound = schedulerEvent.sound; // for now its just an integer number
        
-        SOUNDS[sound].play();
-
         if(schedulerEvent.fade)
         {
             document.body.style.transition = `2.25s ease-in`;
@@ -258,8 +275,26 @@ function handleEvent(schedulerEvent)
             document.body.style.transition = '0.0s';
         }
 
-        setColor(255,255,255);
-       
+
+        if(sound == 99)
+        {
+            SOUNDS[0].play();
+            SOUNDS[0].volume(0);
+        }
+        
+        else if(sound == 100)
+        {
+            SOUNDS[0].play();
+            SOUNDS[0].volume(1);
+            setColor(255,255,255);
+        }
+
+        else
+        {
+            SOUNDS[0].fade(0,1, 8);
+            setColor(255,255,255);
+        }
+    
         //logTimeBetweenEvents();
 
     }
@@ -393,10 +428,11 @@ function connect()
 
 function startSyncing()
 {
-    document.getElementById('logo2').style.display = "none";
-    document.getElementById('logo2').style.opacity = 0;
     sync();
     SYNC_INTERVAL = setInterval(sync, 100);
+
+    document.getElementById('logo2').style.display = "none";
+    document.getElementById('logo2').style.opacity = 0;
 }
 
 

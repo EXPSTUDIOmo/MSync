@@ -2,7 +2,7 @@
  {"time": 0, "data": { "sound": -2}},
  {"time": 300, "data": { "sound": -2}},
  {"time": 600, "data": { "sound": -2}},
- {"time": 1000, "data": { "sound": 0}},
+ {"time": 1000, "data": { "sound": 100}},
  {"time": 2400, "data": { "sound": -1}},
  {"time": 8875, "data": { "sound": 1}},
  {"time": 10125, "data": { "sound": -1}},
@@ -19,7 +19,7 @@
  {"time": 24000, "data": { "sound": 7}},
  {"time": 26874, "data": { "sound": -1}},
  {"time": 32000, "data": { "sound": 8}},
- {"time": 35604, "data": { "sound": -1}}
+ {"time": 35604, "data": { "sound": -3}}
 ]
 
 

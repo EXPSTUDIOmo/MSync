@@ -2,6 +2,7 @@
  {"time": 0, "data": { "sound": -2}},
  {"time": 300, "data": { "sound": -2}},
  {"time": 600, "data": { "sound": -2}},
+ {"time": 1000, "data": { "sound": 99}},
  {"time": 4375, "data": { "sound": 0}},
  {"time": 5600, "data": { "sound": -1}},
  {"time": 12250, "data": { "sound": 1}},
@@ -23,7 +24,7 @@
  {"time": 30062, "data": { "sound": 9}},
  {"time": 30532, "data": { "sound": -1}},
  {"time": 30937, "data": { "sound": 10}},
- {"time": 35604, "data": { "sound": -1}}
+ {"time": 35604, "data": { "sound": -3}}
 ]
 
 
