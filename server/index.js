@@ -1,8 +1,14 @@
 /*
-   SmartSync  
+   MSync
    SWR EXPERIMENTALSTUDIO 
    Maurice Oeser
    2023
+
+   Davor Vincze - FLUCHT
+
+   Smartphone Soundfile Controler
+
+   ermöglicht es Soundfiles synchron auf den Handys des Publikums abzuspielen und zu steuern
 */
 
 // **************** Server setup ****************************
@@ -19,26 +25,34 @@ app.get('/', (req, res) => {
 });
 
 app.use(express.static('public'));
-app.use('/timesync', timesyncServer.requestHandler);
-
 
 server.listen(3000, () => {
   console.log('listening on *:3000');
 });
 
 
+
+
 /*
-  If a user connects without a voiceID set, we give him an "anonymous" voiceID.
-  To avoid collision with a real voiceID, we start at > maximum Users expected.
-  If there is ever a project with more than 1000 voiceIDs set, this number needs to be adjusted.
+  Voice-Counter, der entscheidet welche Stimme das nächste sich verbindene Handy bekommt
 */
-let anonymousClientCounter = 1001; 
+let voiceCounter = 0;
+const numMaxVoices = 5;
+
+function getNextVoice()
+{
+  voiceCounter = (voiceCounter + 1) % numMaxVoices;
+  return voiceCounter;
+}
+
+
+
+
 
 
 // **********************************************************
 
-let clients = new Map(); // list of all connected clients
-let bStartTimeSet = false; // if starttime is initiates or not
+let clients = []; // list of all connected clients
 let START_TIME = -1; // the startpoint, will get triggered by Max with /start
 let isPlaying = false;
 
@@ -48,27 +62,20 @@ let isPlaying = false;
 // ********************** Socket.IO *************************
 io.on('connection', (socket) => {
 
-  let voiceid = parseInt(socket.handshake.query.voiceid);
-  
-  if(isNaN(voiceid))
-  {
-    voiceid = anonymousClientCounter++;
-  }
-    
-  socket.voiceid = voiceid;  
-  clients.set(socket.voiceid, socket);
-  socket.emit('connected', {id: socket.voiceid, isPlaying: false, startTime: START_TIME});
+  socket.voiceid = getNextVoice(); 
+  socket.emit('connected', {id: socket.voiceid});
+  clients.push(socket);
 
   if(bStartTimeSet)
     socket.emit('starttime', START_TIME);
 
   socket.on('disconnect', () => {
-    clients.delete(socket.voiceid);
-  oscToMax.send("/userdisconnect", socket.id, socket.voiceid);
+    clients.splice(clients.indexOf(socket), 1);
+
   });
 
   socket.on('activate', () => {
-    oscToMax.send('/userconnect', socket.id, socket.voiceid);
+    socket.emit("activation", { isPlaying: false, time: START_TIME});
  })
 
 });
@@ -171,13 +178,7 @@ function broadcastMaxMessage(msg)
 }
 
 
-function stopSyncing()
-{
-  clients.forEach((value) => {
-    value.emit('stopsync');
-    
-  });
-}
+
 
 function startPlayback()
 {

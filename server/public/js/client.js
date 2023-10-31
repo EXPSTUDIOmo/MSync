@@ -1,84 +1,80 @@
 /*
     SWR EXPERIMENTALSTUDIO 08/2023
     Maurice Oeser
+
+
+    FLUCHT - Davor Vincze
+    Soundfile Controler MSync
 */
 
 
 /*
+Debug Flag, wenn activ wird die DBG() Funktion ausgeführt, so kann man schnell global 
+alle console.logs() aktivieren bzw. deaktivieren
+*/
+const bDBG = true;
+const debugHeader = document.getElementById('debug'); // nur zum debuggen, TODO: Löschen
+
+
+
+/*
     Prevent the user screen from turning off.
-    Either by wakeLock API or if not supported (Firefox) by NoSleep.js => which is buggy and can lag audio playback...
+    Either by wakeLock API or if not supported (Firefox) by NoSleep.js => which might be buggy, have to check
 */
 const noSleep = new NoSleep();
 let wakeLock = null;
 
+const requestWakeLock = async () => {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+    } catch (err) {
+      console.error(`${err.name}, ${err.message}`);
+    }
+}
 
-// DEBUG FLAG => should we print debug statements?
-const bDBG = true;
-const debugHeader = document.getElementById('debug');
 
 const MAX_ID = 1000; // Maximum expected users with a set voiceID
 
-// TIME_SYNC object, handles synchronisation between server and clients. (https://github.com/enmasseio/timesync)
-let TIME_SYNC = timesync.create({ server: '/timesync', interval: 100});
 
+/*
+    ==============================================================
+    ======================= SOCKET.IO ============================
+    ==============================================================
+*/
 
-// Socket.IO connection to the server
-const urlParams = new URLSearchParams(window.location.search);
-let voiceid = urlParams.get('voiceid');
-
-const socket = io({
-    query: {
-      voiceid: voiceid,
-    }
-});
-
-
+const socket = io();
 
 socket.on('connected', (state) => {
-    console.log("id:", state.id, state.isPlaying, state.startTime);
-    loadEvents(state.id);
+    loadSounds(state.voice)
+});
+
+socket.on('activation', (state) => {
+    let isPlaying = state.isPlaying;
+    let time = state.time;
+
+    // TODO
 });
 
 socket.on('disconnect', (data) => {
     isConnected = false;
 });   
 
-socket.on('starttime', (time) => {
-   SERVER_START_TIME = time;
-   scheduler.postMessage({id: 'starttime', data: SERVER_START_TIME});
-});
-
-socket.on('start', () => {
-    startSyncing();
+socket.on('start', (sound) => {
+   SOUNDS[sound].play();
 });
 
 socket.on('stop', () => {
-    clearInterval(SYNC_INTERVAL);
-    scheduler.postMessage({id: "stop"});
-    SOUNDS[0].stop();
+    // TODO stop current soundfile
 });
 
 socket.on('color', (R,G,B) => {
     setColor(R,G,B);
 });
 
-socket.on('stopsync', () =>
-{
-    stopSyncing();
-})
-
-socket.on('playsound', () => {
-    
-    SOUNDS[getRandomInt(11, 15)].play();
-    setColor(255, 255, 255);
-
-    setTimeout(() => {
-        setColor(0,0,0);
-    }, 300);
-});
 
 
-const faceimg = document.getElementById('faceimg');
+
+
 
 /*
     Incoming MaxMSP Messages. Route them depending on the command sent from Max
@@ -127,18 +123,6 @@ socket.on('max', (msg) => {
 
 let isConnected = false;
 
-// the Date.now() position of the server when the /start message is received
-let SERVER_START_TIME = 0;
-
-// Variable to hold the setInterval for syncing later on
-let SYNC_INTERVAL;
-let SYNC_TIMESTEP = 100;
-
-// Scheduler WebWorker, this handles the precise timing of events due to spinning. notifies mainthread then when an event should fire
-const scheduler = new Worker('/js/Scheduler.js');
-
-// List of events that will get triggered
-let EVENTS;
 
 
 
@@ -156,278 +140,28 @@ let EVENTS;
 
 
 /*
-    AUDIO
+    ==============================================================
+    =========================== AUDIO ============================
+    ==============================================================
 */
 
 let SOUNDS = [];
 
-function playSound(sound, volume)
+function playSound(sound)
 {
-    SOUNDS[sound].volume(volume);
     SOUNDS[sound].play();
 }
 
-function loadEvents(voiceid)
-{
-    if(voiceid > MAX_ID)
-    {
-        for(let i = 0; i < 12; ++i)
-    {
-        SOUNDS.push(new Howl({
-            src: [`Samples/Piano/${i}_pno.mp3`]
-        }));
-    }
-        let file = `./events_debug2.json`;
-        
-        fetch(file)
-        .then((response) => response.json())
-        .then((json) => 
-        {        
-            for(let event of json)
-            {
-                scheduler.postMessage({id: "addevent", event: event});
-            }
-        });
-    }
-    
-}
+
 
 function loadSounds(voiceid)
 {
-
-    SOUNDS[0] = new Howl({
-                src: [`Samples/EoT/EOTM_2.mp3`]
-            });
-
-    SOUNDS[1] = new Howl({
-        src: [`Samples/EoT/EOTM_silence.mp3`]
-    });
-     
-
-    // let numSounds = 9;
-
-    // if(voiceid == 2)
-    //     numSounds = 10;
-    // else if(voiceid == 3)
-    //     numSounds = 12;
-    // else if(voiceid == 4)
-    //     numSounds = 11;
-    // else if(voiceid == 5)
-    //     numSounds = 10;
-    // else if(voiceid == 6)
-    //     numSounds = 11;
-    // else if(voiceid == 7)
-    //     numSounds = 9;
-
-    // for(let i = 0; i < numSounds; ++i)
-    // {
-    //     SOUNDS.push(new Howl({
-    //         src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_${i}.mp3`]
-    //     }));
-    // }
-    
-
-    // SOUNDS.push(new Howl({
-    //     src: [`Samples/EoT/V${voiceid}/EOT_V${voiceid}_99.mp3`],
-    // }));
-}
-
-
-
-/*
-    Scheduler callbacks
-*/
-
-scheduler.onmessage = (event) => {
-
-    switch(event.data.id)
-    {
-        case 'event':
-            handleEvent(event.data.data);
-            break;
-
-        case 'done':
-            document.getElementById('logo2').style.display = "block";
-
-            setTimeout(() => {
-                document.getElementById('logo2').style.opacity = 1;
-            }, 100);
-            
-
-            break;
-    }
-};
-
-let sound = 0;
-function handleEvent(schedulerEvent)
-{
-    if(schedulerEvent.sound == 99)
-    {
-        SOUNDS[sound++].play();
-
-        if(sound >= 11)
-            sound = 0;
-
-        logTimeBetweenEvents();
-    }
-
-    // if(schedulerEvent.sound < 0)
-    // {
-    //     document.body.style.transition = '0.0s';
-    //     setColor(0, 0, 0);
-
-    //     if(schedulerEvent.sound == -2)
-    //     {
-    //         SOUNDS[1].play();
-    //         SOUNDS[1].volume(0);
-    //         SOUNDS[0].volume(0);
-    //     }
-
-    //     else if(schedulerEvent.sound == -1)
-    //     {
-    //         SOUNDS[0].fade(1,0,100);
-    //     }
-
-    // }
-
-    // else
-    // {
-    //     let sound = schedulerEvent.sound; // for now its just an integer number
-       
-    //     if(schedulerEvent.fade)
-    //     {
-    //         document.body.style.transition = `2.25s ease-in`;
-    //     }
-
-    //     else
-    //     {
-    //         document.body.style.transition = '0.0s';
-    //     }
-
-
-    //     if(sound == 99)
-    //     {
-    //         SOUNDS[0].play();
-    //         SOUNDS[0].volume(0);
-    //     }
-        
-    //     else if(sound == 100)
-    //     {
-    //         SOUNDS[0].play();
-    //         SOUNDS[0].volume(1);
-    //         setColor(255,255,255);
-    //     }
-
-    //     else
-    //     {
-    //         SOUNDS[0].fade(0,1, 8);
-    //         setColor(255,255,255);
-    //     }
-    
-    //     //logTimeBetweenEvents();
-
-    // }
-    
-    
-
-    // document.body.style.backgroundColor = schedulerEvent.color;
-}
-
-
-function velocityToColour(velocity)
-{
-    let R = G = B = 0;
-
-    switch(velocity)
-    {
-        case 65:
-            R = G = B = 255;
-            break;
-        case 66:
-            R = 255;
-            G = 0;
-            B = 0;
-            break;
-        case 67:
-            R = 0;
-            G = 255;
-            B = 0;
-            break;
-        case 68:
-            R = 0;
-            G = 0;
-            B = 255;
-            break;
-        case 69: 
-            R = 255;
-            G = 0;
-            B = 255;
-            break;
-        case 70:
-            R = 0;
-            G = 255;
-            B = 255;
-            break;
-        case 71:
-            R = 255;
-            G = 255;
-            B = 0;
-            break;
-        case 72:
-            R = 154;
-            G = 255;
-            B = 22;
-            break;
-        case 73: 
-            R = 255;
-            G = 155;
-            B = 0;
-            break;
-        case 74: 
-            R = 0;
-            G = 200;
-            B = 255;
-            break;
-        case 75:
-            R = 200;
-            G = 220;
-            B = 250;
-            break;
-        case 76: 
-            R = 255;
-            G = 255;
-            B = 255;
-            break;
-        default:
-            R = 255;
-            G = 255;
-            B = 255;
-            break;
-    }
-    
-
-    setColor(R, G, B);
-}
-
-let lastEventTime = 0;
-function logTimeBetweenEvents()
-{
-  let now = performance.now();
-  let diff = now - lastEventTime;
-  lastEventTime = now;
-  DBG("time between events " + diff);
+    // TODO : sounds für die voice laden
 }
 
 
 
 
-
-/*
-
-*/
-
-// this function doesn't do anything right now (since we moved socket.io connection to pageload),
-// besides letting us activate the audio context through user action
 
 document.getElementById('connect_btn').onclick = () =>
 {
@@ -452,52 +186,23 @@ document.getElementById('connect_btn').onclick = () =>
     }, 600)
 
 
-        // Make sure you handle the scenario where the Wake Lock API is not available
+    // Make sure you handle the scenario where the Wake Lock API is not available
     if ('wakeLock' in navigator) {
         requestWakeLock();
     } else {
         noSleep.enable();
-        console.log("WakeLock API not supported. Using NoSleep.js");
+        DBG("WakeLock API not supported. Using NoSleep.js");
     }
 }
 
 
-// Function to request a wake lock
-const requestWakeLock = async () => {
-    try {
-      wakeLock = await navigator.wakeLock.request('screen');
-      wakeLock.addEventListener('release', () => {
-        console.log('Wake Lock was released');
-      });
-      console.log('Wake Lock is active');
-    } catch (err) {
-      console.error(`${err.name}, ${err.message}`);
-    }
-  }
 
 
-function startSyncing()
-{
-    console.log("START SYNC");
-    sync();
-    SYNC_INTERVAL = setInterval(sync, SYNC_TIMESTEP);
 
-    document.getElementById('logo2').style.display = "none";
-    document.getElementById('logo2').style.opacity = 0;
-}
 
-function stopSyncing()
-{
-    console.log("STOP SYNC");
-    clearInterval(SYNC_INTERVAL);
-}
 
-function sync()
-{
-    let time = TIME_SYNC.now();
-    let elapsedTime = time - SERVER_START_TIME;
-    scheduler.postMessage({id: 'sync', elapsedTime: elapsedTime, timePoint: Date.now()});
-}
+
+
 
 
 
@@ -505,8 +210,9 @@ function sync()
 
 
 /*
-    DEBUG Function, so we can easily turn on/off global debug logging
+    UTILITY FUNCTIONS
 */
+
 function DBG(msg)
 {
     if(bDBG)
@@ -516,16 +222,6 @@ function DBG(msg)
     }
      
 }
-
-
-
-
-
-
-
-/*
-    UTILS
-*/
 
 
 function setColor(R,G,B)
@@ -540,61 +236,11 @@ function getRandomInt(min, max) {
 }
 
 
-/*
-    MATRIX
-*/
-
-// const canvas = document.getElementById('matrixcanvas');
-// const ctx = canvas.getContext('2d');
-// const bgcanvas = document.getElementById('bgcanvas');
-// const bgctx = bgcanvas.getContext('2d');
-
-// const w = canvas.width = document.body.offsetWidth;
-// const h = canvas.height = document.body.offsetHeight;
-// const cols = Math.floor(w / 20) + 1;
-// const ypos = Array(cols).fill(0);
 
 
 
-// ctx.fillStyle = '#0000';
-// ctx.fillRect(0, 0, w, h);
 
-// const imgAspect = 900 / 546;
 
-// const expText = "EXPERIMENTALSTUDIO";
-// let expIndex = 0;
-// let expActive = false;
-
-// function matrix () {
-//     ctx.fillStyle = '#0001';
-//     ctx.fillRect(0, 0, w, h);
-
-//     //bgctx.clearRect(0,0,w,h);
-//     //bgctx.drawImage(bgImage, 0, 0, bgcanvas.width, bgImage.width / imgAspect);
-
-//     // Everything else remains the same
-//     ctx.fillStyle = '#fff';
-//     ctx.font = '20pt monospace';
-
-//     ypos.forEach((y, ind) => {
-//         let text = String.fromCharCode(Math.random() * 128);
-
-//         if(Math.random() > 0.998 )
-//         {
-//             if(Math.random () > 0.5)
-//                 text = "EXPERIMENTAL";
-//             else
-//                 text = "STUDIO"
-//         }
-            
-       
-
-//         const x = ind * 20;
-//         ctx.fillText(text, x, y);
-//         if (y > 100 + Math.random() * 10000) ypos[ind] = 0;
-//         else ypos[ind] = y + 20;
-//     });
-// }
 
 
 
