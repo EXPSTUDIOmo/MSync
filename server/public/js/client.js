@@ -3,23 +3,28 @@
     Maurice Oeser
 */
 
+
+/*
+    Prevent the user screen from turning off.
+    Either by wakeLock API or if not supported (Firefox) by NoSleep.js => which is buggy and can lag audio playback...
+*/
+const noSleep = new NoSleep();
+let wakeLock = null;
+
+
 // DEBUG FLAG => should we print debug statements?
 const bDBG = true;
 const debugHeader = document.getElementById('debug');
 
-// EXAMPLE of url containing query parameters for voiceid
-// http://localhost:3000/?voiceid=1
-
+const MAX_ID = 1000; // Maximum expected users with a set voiceID
 
 // TIME_SYNC object, handles synchronisation between server and clients. (https://github.com/enmasseio/timesync)
-let TIME_SYNC = timesync.create({ server: '/timesync', interval: 200});
-   
+let TIME_SYNC = timesync.create({ server: '/timesync', interval: 100});
+
+
 // Socket.IO connection to the server
-
 const urlParams = new URLSearchParams(window.location.search);
-const voiceid = urlParams.get('voiceid');
-
-let voiceCounter = 0;
+let voiceid = urlParams.get('voiceid');
 
 const socket = io({
     query: {
@@ -27,8 +32,11 @@ const socket = io({
     }
 });
 
-socket.on('connected', (index) => {
-    loadEvents(voiceid);
+
+
+socket.on('connected', (state) => {
+    console.log("id:", state.id, state.isPlaying, state.startTime);
+    loadEvents(state.id);
 });
 
 socket.on('disconnect', (data) => {
@@ -54,6 +62,10 @@ socket.on('color', (R,G,B) => {
     setColor(R,G,B);
 });
 
+socket.on('stopsync', () =>
+{
+    stopSyncing();
+})
 
 socket.on('playsound', () => {
     
@@ -120,6 +132,7 @@ let SERVER_START_TIME = 0;
 
 // Variable to hold the setInterval for syncing later on
 let SYNC_INTERVAL;
+let SYNC_TIMESTEP = 100;
 
 // Scheduler WebWorker, this handles the precise timing of events due to spinning. notifies mainthread then when an event should fire
 const scheduler = new Worker('/js/Scheduler.js');
@@ -156,20 +169,27 @@ function playSound(sound, volume)
 
 function loadEvents(voiceid)
 {
+    if(voiceid > MAX_ID)
+    {
+        for(let i = 0; i < 12; ++i)
+    {
+        SOUNDS.push(new Howl({
+            src: [`Samples/Piano/${i}_pno.mp3`]
+        }));
+    }
+        let file = `./events_debug2.json`;
+        
+        fetch(file)
+        .then((response) => response.json())
+        .then((json) => 
+        {        
+            for(let event of json)
+            {
+                scheduler.postMessage({id: "addevent", event: event});
+            }
+        });
+    }
     
-    loadSounds(voiceid);
-
-    let file = `./events_t${voiceid}.json`;
-    
-    fetch(file)
-    .then((response) => response.json())
-    .then((json) => 
-    {        
-        for(let event of json)
-        {
-            scheduler.postMessage({id: "addevent", event: event});
-        }
-    });
 }
 
 function loadSounds(voiceid)
@@ -238,66 +258,75 @@ scheduler.onmessage = (event) => {
     }
 };
 
-
+let sound = 0;
 function handleEvent(schedulerEvent)
 {
-
-    if(schedulerEvent.sound < 0)
+    if(schedulerEvent.sound == 99)
     {
-        document.body.style.transition = '0.0s';
-        setColor(0, 0, 0);
+        SOUNDS[sound++].play();
 
-        if(schedulerEvent.sound == -2)
-        {
-            SOUNDS[1].play();
-            SOUNDS[1].volume(0);
-            SOUNDS[0].volume(0);
-        }
+        if(sound >= 11)
+            sound = 0;
 
-        else if(schedulerEvent.sound == -1)
-        {
-            SOUNDS[0].fade(1,0,100);
-        }
-
+        logTimeBetweenEvents();
     }
 
-    else
-    {
-        let sound = schedulerEvent.sound; // for now its just an integer number
+    // if(schedulerEvent.sound < 0)
+    // {
+    //     document.body.style.transition = '0.0s';
+    //     setColor(0, 0, 0);
+
+    //     if(schedulerEvent.sound == -2)
+    //     {
+    //         SOUNDS[1].play();
+    //         SOUNDS[1].volume(0);
+    //         SOUNDS[0].volume(0);
+    //     }
+
+    //     else if(schedulerEvent.sound == -1)
+    //     {
+    //         SOUNDS[0].fade(1,0,100);
+    //     }
+
+    // }
+
+    // else
+    // {
+    //     let sound = schedulerEvent.sound; // for now its just an integer number
        
-        if(schedulerEvent.fade)
-        {
-            document.body.style.transition = `2.25s ease-in`;
-        }
+    //     if(schedulerEvent.fade)
+    //     {
+    //         document.body.style.transition = `2.25s ease-in`;
+    //     }
 
-        else
-        {
-            document.body.style.transition = '0.0s';
-        }
+    //     else
+    //     {
+    //         document.body.style.transition = '0.0s';
+    //     }
 
 
-        if(sound == 99)
-        {
-            SOUNDS[0].play();
-            SOUNDS[0].volume(0);
-        }
+    //     if(sound == 99)
+    //     {
+    //         SOUNDS[0].play();
+    //         SOUNDS[0].volume(0);
+    //     }
         
-        else if(sound == 100)
-        {
-            SOUNDS[0].play();
-            SOUNDS[0].volume(1);
-            setColor(255,255,255);
-        }
+    //     else if(sound == 100)
+    //     {
+    //         SOUNDS[0].play();
+    //         SOUNDS[0].volume(1);
+    //         setColor(255,255,255);
+    //     }
 
-        else
-        {
-            SOUNDS[0].fade(0,1, 8);
-            setColor(255,255,255);
-        }
+    //     else
+    //     {
+    //         SOUNDS[0].fade(0,1, 8);
+    //         setColor(255,255,255);
+    //     }
     
-        //logTimeBetweenEvents();
+    //     //logTimeBetweenEvents();
 
-    }
+    // }
     
     
 
@@ -399,7 +428,8 @@ function logTimeBetweenEvents()
 
 // this function doesn't do anything right now (since we moved socket.io connection to pageload),
 // besides letting us activate the audio context through user action
-function connect()
+
+document.getElementById('connect_btn').onclick = () =>
 {
     if(isConnected)
         return;
@@ -412,7 +442,7 @@ function connect()
         document.getElementById('connect_btn').classList.add('grow');
         document.getElementById('logo').classList.add('grow');
     }, 250);
-   
+
     isConnected = true;
 
     setTimeout(() => {
@@ -422,19 +452,45 @@ function connect()
     }, 600)
 
 
-
+        // Make sure you handle the scenario where the Wake Lock API is not available
+    if ('wakeLock' in navigator) {
+        requestWakeLock();
+    } else {
+        noSleep.enable();
+        console.log("WakeLock API not supported. Using NoSleep.js");
+    }
 }
+
+
+// Function to request a wake lock
+const requestWakeLock = async () => {
+    try {
+      wakeLock = await navigator.wakeLock.request('screen');
+      wakeLock.addEventListener('release', () => {
+        console.log('Wake Lock was released');
+      });
+      console.log('Wake Lock is active');
+    } catch (err) {
+      console.error(`${err.name}, ${err.message}`);
+    }
+  }
 
 
 function startSyncing()
 {
+    console.log("START SYNC");
     sync();
-    SYNC_INTERVAL = setInterval(sync, 100);
+    SYNC_INTERVAL = setInterval(sync, SYNC_TIMESTEP);
 
     document.getElementById('logo2').style.display = "none";
     document.getElementById('logo2').style.opacity = 0;
 }
 
+function stopSyncing()
+{
+    console.log("STOP SYNC");
+    clearInterval(SYNC_INTERVAL);
+}
 
 function sync()
 {
@@ -442,6 +498,9 @@ function sync()
     let elapsedTime = time - SERVER_START_TIME;
     scheduler.postMessage({id: 'sync', elapsedTime: elapsedTime, timePoint: Date.now()});
 }
+
+
+
 
 
 
@@ -459,11 +518,9 @@ function DBG(msg)
 }
 
 
-function getRandomInt(min, max) {
-    min = Math.ceil(min);
-    max = Math.floor(max);
-    return Math.floor(Math.random() * (max - min + 1)) + min;
-}
+
+
+
 
 
 /*
@@ -476,6 +533,11 @@ function setColor(R,G,B)
     document.body.style.backgroundColor = `rgb(${R}, ${G}, ${B} )`
 }
 
+function getRandomInt(min, max) {
+    min = Math.ceil(min);
+    max = Math.floor(max);
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 
 /*

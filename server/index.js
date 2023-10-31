@@ -1,3 +1,11 @@
+/*
+   SmartSync  
+   SWR EXPERIMENTALSTUDIO 
+   Maurice Oeser
+   2023
+*/
+
+// **************** Server setup ****************************
 const express = require('express');
 const app = express();
 const http = require('http');
@@ -5,11 +13,6 @@ const server = http.createServer(app);
 const { Server } = require("socket.io");
 const io = new Server(server);
 const timesyncServer = require('timesync/server');
-
-let bStartTimeSet = false; // if starttime is initiates or not
-let START_TIME = 0; // the startpoint, will get triggered by Max with /start
-let clients = new Map(); // list of all connected clients
-
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
@@ -19,61 +22,68 @@ app.use(express.static('public'));
 app.use('/timesync', timesyncServer.requestHandler);
 
 
-
-io.on('connection', (socket) => {
-
-  const voiceid = parseInt(socket.handshake.query.voiceid);
-
-  socket.on('activate', () => {
-    oscToMax.send('/userconnect', socket.id, socket.voiceid);
- })
- 
-  socket.voiceid = voiceid;
-  addClient(socket);
-
-  if(bStartTimeSet)
-    socket.emit('starttime', START_TIME);
-
-  socket.on('disconnect', () => {
-    removeClient(socket);
-  });
-
-});
-
-
-
-
-
 server.listen(3000, () => {
   console.log('listening on *:3000');
 });
 
 
+/*
+  If a user connects without a voiceID set, we give him an "anonymous" voiceID.
+  To avoid collision with a real voiceID, we start at > maximum Users expected.
+  If there is ever a project with more than 1000 voiceIDs set, this number needs to be adjusted.
+*/
+let anonymousClientCounter = 1001; 
 
-function addClient(socket)
-{
+
+// **********************************************************
+
+let clients = new Map(); // list of all connected clients
+let bStartTimeSet = false; // if starttime is initiates or not
+let START_TIME = -1; // the startpoint, will get triggered by Max with /start
+let isPlaying = false;
+
+
+
+
+// ********************** Socket.IO *************************
+io.on('connection', (socket) => {
+
+  let voiceid = parseInt(socket.handshake.query.voiceid);
+  
+  if(isNaN(voiceid))
+  {
+    voiceid = anonymousClientCounter++;
+  }
+    
+  socket.voiceid = voiceid;  
   clients.set(socket.voiceid, socket);
-  socket.emit('connected', socket.voiceid);
- 
-}
+  socket.emit('connected', {id: socket.voiceid, isPlaying: false, startTime: START_TIME});
 
+  if(bStartTimeSet)
+    socket.emit('starttime', START_TIME);
 
-function removeClient(socket)
-{
-  clients.delete(socket.voiceid);
+  socket.on('disconnect', () => {
+    clients.delete(socket.voiceid);
   oscToMax.send("/userdisconnect", socket.id, socket.voiceid);
-}
-
-
-function setStartTime()
-{
-  START_TIME = Date.now();
-  bStartTimeSet = true;
-
-  clients.forEach((value) => {
-    value.emit('starttime', START_TIME);
   });
-}
+
+  socket.on('activate', () => {
+    oscToMax.send('/userconnect', socket.id, socket.voiceid);
+ })
+
+});
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -107,6 +117,10 @@ oscServer.on('message', function (msg) {
     case '/stop':
       stopPlayback();
       oscToMax.send('/node', "stopped");
+      break;
+
+    case '/stopsync':
+      stopSyncing();
       break;
 
     case '/colorall':
@@ -150,12 +164,20 @@ function routeMaxMessageToClient(msg)
 function broadcastMaxMessage(msg)
 {
   msg.splice(0,1);
-  clients.forEach((value, key, map) => {
+  clients.forEach((value, key) => {
     value.emit('max', msg);
     console.log("client plays", key);
   });
 }
 
+
+function stopSyncing()
+{
+  clients.forEach((value) => {
+    value.emit('stopsync');
+    
+  });
+}
 
 function startPlayback()
 {
@@ -166,9 +188,22 @@ function startPlayback()
   });
 }
 
+function setStartTime()
+{
+  START_TIME = Date.now();
+  bStartTimeSet = true;
+  isPlaying = true;
+
+  clients.forEach((value) => {
+    value.emit('starttime', START_TIME);
+  });
+}
+
 
 function stopPlayback()
 {
+  isPlaying = false;
+
   clients.forEach((value, key, map) => {
     value.emit('stop');
   });

@@ -98,9 +98,9 @@ function triggerEvent()
 }
 
 
-function sync(serverTime, atTimePoint)
+function sync(elapsedServerTime, atTimePoint)
 {
-    elapsedTime = serverTime;
+    elapsedTime = elapsedServerTime;
     lastSyncTime = atTimePoint;
 
     if(elapsedTime > 0)
