@@ -64,6 +64,7 @@ socket.on('activation', (state) => {
 
 socket.on('disconnect', (data) => {
     isConnected = false;
+    DBG("disconnected from server. please refresh the page");
 });   
 
 socket.on('start', (sound) => {
