@@ -5,6 +5,9 @@
 
     FLUCHT - Davor Vincze
     Soundfile Controler MSync
+    
+
+    Client side 
 */
 
 
@@ -33,7 +36,7 @@ const requestWakeLock = async () => {
 }
 
 
-const MAX_ID = 1000; // Maximum expected users with a set voiceID
+
 
 
 /*
@@ -79,7 +82,7 @@ socket.on('color', (R,G,B) => {
     setColor(R,G,B);
 });
 
-let isConnected = false;
+
 
 
 
@@ -141,7 +144,7 @@ function loadSounds(voiceid)
     Daher beginnt Audio-Logik erst nachdem user sich "activated" hat
 
 */
-
+let isConnected = false;
 document.getElementById('connect_btn').onclick = () =>
 {
     if(isConnected)
@@ -164,8 +167,7 @@ document.getElementById('connect_btn').onclick = () =>
     document.getElementById('content').style.visibility = "visible";
     }, 600)
 
-
-    // Make sure you handle the scenario where the Wake Lock API is not available
+    // wakelock
     if ('wakeLock' in navigator) {
         requestWakeLock();
     } else {

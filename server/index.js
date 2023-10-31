@@ -74,7 +74,6 @@ io.on('connection', (socket) => {
 
   socket.on('disconnect', () => {
     clients.splice(clients.indexOf(socket), 1);
-
   });
 
   socket.on('activate', () => {
@@ -84,8 +83,6 @@ io.on('connection', (socket) => {
       let timeToJump = (Date.now() - lastStartTime) / 1000; // Howler wants seconds
       socket.emit("activation", { playing: isPlaying, sound: currentSoundfile, time: timeToJump});
     }
-     
-
  })
 
 });
@@ -143,6 +140,11 @@ oscServer.on('message', function (msg) {
 });
 
 
+
+
+
+
+// ================================= Client Control =========================
 
 function startPlayback(soundID)
 {
