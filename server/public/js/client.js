@@ -48,11 +48,18 @@ socket.on('connected', (state) => {
     loadSounds(state.voice)
 });
 
-socket.on('activation', (state) => {
-    let isPlaying = state.isPlaying;
-    let time = state.time;
 
-    // TODO
+socket.on('activation', (state) => {
+    let isPlaying = state.playing;
+    let time = state.time;
+    let file = state.sound;
+
+    if(isPlaying)
+    {
+        playSound(file);
+        SOUNDS[file].seek(time);
+        DBG(`jump to ${time}`);
+    }
 });
 
 socket.on('disconnect', (data) => {
@@ -60,68 +67,21 @@ socket.on('disconnect', (data) => {
 });   
 
 socket.on('start', (sound) => {
-   SOUNDS[sound].play();
+   playSound(sound);
 });
 
 socket.on('stop', () => {
-    // TODO stop current soundfile
+    stopSound();
 });
 
 socket.on('color', (R,G,B) => {
     setColor(R,G,B);
 });
 
-
-
-
-
-
-/*
-    Incoming MaxMSP Messages. Route them depending on the command sent from Max
-*/
-socket.on('max', (msg) => {
-
-    let command = msg[0];
-    
-    switch(command)
-    {
-        case 'play':
-            let soundToPlay = msg[1];
-            let volume = msg[2] == undefined ? 1 : msg[2];
-            playSound(soundToPlay, volume);
-            flashFace();
-            break;
-        
-        case 'stop':
-            let soundToStop = msg[1];
-            SOUNDS[soundToStop].stop();
-            break;
-
-        case 'stopall':
-            for(let sound of SOUNDS)
-            {
-                sound.stop();
-            }
-
-        case 'loop':
-            let soundToLoop = msg[1];
-            let shouldLoop = msg[2] == 1 ? true : false;
-            SOUNDS[soundToLoop].loop(shouldLoop);
-            break;
-
-        case 'volume':
-            let soundToChangeVolume = msg[1];
-            let newVolume = msg[2];
-            SOUNDS[soundToChangeVolume].volume(newVolume);
-
-        case 'go':
-            playSound(voiceCounter, 1);
-            flashFace();
-    }
-})
-
-
 let isConnected = false;
+
+
+
 
 
 
@@ -146,22 +106,40 @@ let isConnected = false;
 */
 
 let SOUNDS = [];
+let currentSound = 0;
 
 function playSound(sound)
 {
     SOUNDS[sound].play();
+    currentSound = sound;
+    DBG(`playing sound ${sound}`);
 }
 
+function stopSound()
+{
+    SOUNDS[currentSound].stop();
+    DBG(`stopping sound ${currentSound}`);
+}
 
 
 function loadSounds(voiceid)
 {
-    // TODO : sounds für die voice laden
+    DBG(`loading sounds for voice ${voiceid}`);
+
+    SOUNDS[0] = new Howl({
+        src: [`Samples/vincze/FL_${voiceid}.mp3`],
+        html5: true
+      }); 
 }
 
 
 
+/*
+    Activation Funktion, wenn user connect button klickt.
+    Browser muten Audio-Kontext bis der user eine Aktion auf der Webseite durchführt.
+    Daher beginnt Audio-Logik erst nachdem user sich "activated" hat
 
+*/
 
 document.getElementById('connect_btn').onclick = () =>
 {
