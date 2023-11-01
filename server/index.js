@@ -128,13 +128,13 @@ oscServer.on('message', function (msg) {
       oscToMax.send('/server', "stopped");
       break;
 
-    // case '/colorall':
-    //   let R = msg[1];
-    //   let G = msg[2];
-    //   let B = msg[3];
+    case '/colorall':
+      let R = msg[1];
+      let G = msg[2];
+      let B = msg[3];
 
-    //   setClientColors(R,G,B);
-    //   break;
+      setClientColors(R,G,B);
+      break;
   }
 
 });
@@ -168,11 +168,11 @@ function stopPlayback()
 
 
 
-// function setClientColors(R,G,B)
-// {
-//   clients.forEach((value, key, map) => {
-//     value.emit('color', R,G,B);
-//   });
-// }
+function setClientColors(R,G,B)
+{
+  clients.forEach((value, key, map) => {
+    value.emit('color', R,G,B);
+  });
+}
 
 
