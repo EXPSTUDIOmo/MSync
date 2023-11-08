@@ -108,7 +108,7 @@ io.on('connection', (socket) => {
 const OSCserver = require('node-osc').Server;
 const OSCClient = require('node-osc').Client;
 
-const oscToMax = new OSCClient('127.0.0.1', 5555); // TODO evtl. dynamisch wenn nicht auf gleichem Rechner wie Max
+const oscToMax = new OSCClient('10.31.13.57', 5555); // TODO evtl. dynamisch wenn nicht auf gleichem Rechner wie Max
 
 let oscServer = new OSCserver(3333, '0.0.0.0', () => {
   console.log('OSC Server is listening');
