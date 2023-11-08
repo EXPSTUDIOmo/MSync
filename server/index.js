@@ -22,13 +22,19 @@ const { Server } = require("socket.io");
 const io = new Server(server);
 const timesyncServer = require('timesync/server');
 
+app.use(express.static('public'));
+
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
   console.log("Request:", req.query);
 });
 
+app.get('/guest/s/default/', (req, res) => {
+  res.redirect('http://10.31.13.57:3000');
+});
 
-app.use(express.static('public'));
+
+
 
 
 server.listen(3000, () => {
