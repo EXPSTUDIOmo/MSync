@@ -24,6 +24,7 @@ const timesyncServer = require('timesync/server');
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
+  console.log("Request:", req);
 });
 
 
