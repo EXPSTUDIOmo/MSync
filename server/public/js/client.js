@@ -131,7 +131,7 @@ function loadSounds(voiceid)
     DBG(`loading sounds for voice ${voiceid}`);
 
     SOUNDS[0] = new Howl({
-        src: [`Samples/vincze/FL_${voiceid}.mp3`],
+        src: [`Samples/test/TS_${voiceid+1}.mp3`],
         html5: true
       }); 
 }
