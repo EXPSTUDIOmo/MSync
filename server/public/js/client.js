@@ -126,37 +126,51 @@ function stopSound()
 }
 
 
+
+
 function loadSounds(voiceid)
 {
     DBG(`loading sounds for voice ${voiceid}`);
 
-    // SOUNDS[0] = new Howl({
-    //     src: [`Samples/vincze/FL_${voiceid}.mp3`],
-    //     html5: true
-    //   }); 
-
-    // SOUNDS[1] = new Howl({
-    //     src: [`Samples/test/TS_${voiceid+1}.mp3`],
-    //     html5: true
-    //   }); 
-
-     SOUNDS[0] = new Howl({
-        src: [`Samples/test/TS_3.mp3`],
-        html5: true
+    SOUNDS[0] = new Howl({
+        src: [`Samples/vincze/FL_${voiceid}.mp3`],
+        html5: true,
+        onload: function() {
+           incrementSFLoaded();
+          }
       }); 
 
-      SOUNDS[1] = new Howl({
-        src: [`Samples/test/TSL_3.mp3`],
-        html5: true
+    SOUNDS[1] = new Howl({
+        src: [`Samples/test/TS_${voiceid+1}.mp3`],
+        html5: true,
+        onload: function() {
+            incrementSFLoaded();
+           }
       }); 
 
-      SOUNDS[2] = new Howl({
-        src: [`Samples/test/TSS_3.mp3`],
-        html5: true
-      }); 
+  
+
+    SOUNDS[2] = new Howl({
+    src: [`Samples/test/TSS_3.mp3`],
+    html5: true,
+    onload: function() {
+        incrementSFLoaded();
+       }
+    }); 
   
 }
 
+let soundfilesLoaded = 0;
+function incrementSFLoaded()
+{
+    soundfilesLoaded++;
+
+    if(soundfilesLoaded == 3)
+    {
+        DBG("HEUREKA ALLES GELADEN");
+        setColor(0, 255, 0);
+    }
+}
 
 
 /*
