@@ -26,7 +26,6 @@ app.use(express.static('public'));
 
 app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
-  console.log("Request:", req.query);
 });
 
 app.get('/guest/s/default/', (req, res) => {
@@ -139,6 +138,10 @@ oscServer.on('message', function (msg) {
       let R = msg[1];
       let G = msg[2];
       let B = msg[3];
+
+    case '/users':
+      oscToMax.send("/users", clients.length);
+      break;
 
       setClientColors(R,G,B);
       break;
