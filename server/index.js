@@ -138,12 +138,14 @@ oscServer.on('message', function (msg) {
       let R = msg[1];
       let G = msg[2];
       let B = msg[3];
+      setClientColors(R,G,B);
+      break;
 
     case '/users':
       oscToMax.send("/users", clients.length);
       break;
 
-      setClientColors(R,G,B);
+      
       break;
   }
 
