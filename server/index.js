@@ -30,7 +30,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/guest/s/default/', (req, res) => {
-  res.redirect('http://10.31.13.57:3000');
+  res.redirect('http://10.31.13.162:3000');
 });
 
 
