@@ -48,9 +48,27 @@ const requestWakeLock = async () => {
 const socket = io();
 
 socket.on('connected', (state) => {
-    loadSounds(state.voice)
+    loadSounds(state.voice);
+    setInterval(ping, 1000);
 });
 
+let pingTimeout;
+
+function ping()
+{
+    socket.emit("ping");
+    pingTimeout = setTimeout(pingFailed, 2000);
+}
+
+socket.on('pong', () => {
+    clearTimeout(pingTimeout);
+})
+
+function pingFailed()
+{
+    DBG("PING FAILED! CONNECTION DISTURBED!");
+    setColor(255,0,0);
+}
 
 socket.on('activation', (state) => {
     let isPlaying = state.playing;

@@ -91,6 +91,10 @@ io.on('connection', (socket) => {
     }
  })
 
+ socket.on('ping', () => {
+    socket.emit('pong');
+ })
+
 });
 
 
