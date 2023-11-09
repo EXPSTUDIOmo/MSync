@@ -61,6 +61,7 @@ function ping()
 }
 
 socket.on('pong', () => {
+    DBG("ping :)");
     clearTimeout(pingTimeout);
 })
 
