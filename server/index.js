@@ -167,8 +167,7 @@ function startPlayback(soundID)
   lastStartTime = Date.now();
   isPlaying = true;
 
-  for(let client of clients)
-    client.emit('start', soundID);
+  io.emit('start', soundID);
 }
 
 
@@ -177,8 +176,7 @@ function stopPlayback()
 {
   isPlaying = false;
 
-  for(let client of clients)
-    client.emit('stop');
+  io.emit('stop');
 }
 
 
@@ -186,9 +184,7 @@ function stopPlayback()
 
 function setClientColors(R,G,B)
 {
-  clients.forEach((value, key, map) => {
-    value.emit('color', R,G,B);
-  });
+  io.emit('color', R,G,B);
 }
 
 
