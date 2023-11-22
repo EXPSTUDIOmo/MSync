@@ -15,10 +15,13 @@
 Debug Flag, wenn activ wird die DBG() Funktion ausgeführt, so kann man schnell global 
 alle console.logs() aktivieren bzw. deaktivieren
 */
-const bDBG = true;
-const debugHeader = document.getElementById('debug'); // nur zum debuggen, TODO: Löschen
-
-
+const bDBG = false;
+//const debugHeader = document.getElementById('debug'); // nur zum debuggen, TODO: Löschen
+const progress = document.getElementById('progress');
+const connectBtn = document.getElementById('connect_btn');
+const content = document.getElementById('content');
+let pulses = document.getElementsByClassName('pulse');
+let pulses_play = document.getElementsByClassName('pulse_play');
 
 /*
     Prevent the user screen from turning off.
@@ -135,12 +138,25 @@ function playSound(sound)
 {
     SOUNDS[sound].play();
     currentSound = sound;
+    content.style.backgroundColor = "white";
+
+    for(let playp of pulses_play)
+    {
+        playp.style.display = "block";
+    }
+
     DBG(`playing sound ${sound}`);
 }
 
 function stopSound()
 {
     SOUNDS[currentSound].stop();
+
+    for(let playp of pulses_play)
+    {
+        playp.style.display = "none";
+    }
+
     DBG(`stopping sound ${currentSound}`);
 }
 
@@ -149,10 +165,10 @@ function stopSound()
 
 function loadSounds(voiceid)
 {
-    DBG(`loading sounds for voice ${voiceid}`);
+    DBG(`loading sounds for voice ${voiceid+1}`);
 
     SOUNDS[0] = new Howl({
-        src: [`Samples/vincze/FL_${voiceid}.mp3`],
+        src: [`Samples/vincze/FL_${voiceid+1}.mp3`],
         html5: true,
         onload: function() {
            incrementSFLoaded();
@@ -160,34 +176,28 @@ function loadSounds(voiceid)
       }); 
 
     SOUNDS[1] = new Howl({
-        src: [`Samples/test/TS_${voiceid+1}.mp3`],
+        src: [`Samples/vincze/CP_${voiceid+1}.mp3`],
         html5: true,
         onload: function() {
             incrementSFLoaded();
            }
       }); 
-
-  
-
-    SOUNDS[2] = new Howl({
-    src: [`Samples/test/TSS_3.mp3`],
-    html5: true,
-    onload: function() {
-        incrementSFLoaded();
-       }
-    }); 
-  
 }
 
 let soundfilesLoaded = 0;
 function incrementSFLoaded()
 {
     soundfilesLoaded++;
+    progress.setAttribute('value', soundfilesLoaded);
 
-    if(soundfilesLoaded == 3)
+    if(soundfilesLoaded == 2)
     {
-        DBG("HEUREKA ALLES GELADEN");
-        setColor(0, 255, 0);
+        progress.style.display = "none";
+        connectBtn.style.display = "block";
+
+        pulses[0].style.animationIterationCount = "1";
+        pulses[1].style.animationIterationCount = "1";
+
     }
 }
 
@@ -199,7 +209,7 @@ function incrementSFLoaded()
 
 */
 let isConnected = false;
-document.getElementById('connect_btn').onclick = () =>
+connectBtn.onclick = () =>
 {
     if(isConnected)
         return;
@@ -253,7 +263,7 @@ function DBG(msg)
     if(bDBG)
     {
         console.log(msg);
-        debugHeader.textContent = msg;
+        //debugHeader.textContent = msg;
     }
      
 }
@@ -261,7 +271,12 @@ function DBG(msg)
 
 function setColor(R,G,B)
 {
-    document.body.style.backgroundColor = `rgb(${R}, ${G}, ${B} )`
+    content.style.backgroundColor = `rgb(${R}, ${G}, ${B} )`;
+
+    for(let playp of pulses_play)
+    {
+        playp.style.borderColor = `rgb(${255 - R},${255 - G}, ${255 - B} )`;
+    }
 }
 
 function getRandomInt(min, max) {

@@ -9,12 +9,17 @@
     <link rel="stylesheet" href="/css/styles.css">
   </head>
   <body>
-    <h1 id="debug" style="color:red">Heureka</h1>
+    <!--<h1 id="debug" style="color:red">Heureka</h1>-->
     <div id="start_screen">
        <img id="logo" src="exp_logo_black.jpg" width="70%" alt="SWR EXPERIMENTALSTUDIO">
        <button id="connect_btn" onclick="connect()">CONNECT</button>
+       <div class='pulse'></div>
+       <div class='pulse pulse2'></div>
+       <progress id="progress" max="2" value="0"></progress>
     </div>
     <div id="content">
+      <div class='pulse_play'></div>
+      <div class='pulse_play pulse2'></div>
       <img id="logo2" src="exp_logo_black.jpg" width="70%" alt="SWR EXPERIMENTALSTUDIO">
     </div>
   </body>

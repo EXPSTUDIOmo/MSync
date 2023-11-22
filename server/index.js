@@ -28,16 +28,10 @@ app.get('/', (req, res) => {
   res.sendFile(__dirname + '/public/index.html');
 });
 
-app.get('/guest/s/default/', (req, res) => {
-  res.redirect('http://10.31.13.162:3000');
-});
 
 
-
-
-
-server.listen(3000, () => {
-  console.log('listening on *:3000');
+server.listen(80, () => {
+  console.log('listening on *:80');
 });
 
 
