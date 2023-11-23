@@ -60,7 +60,7 @@ let pingTimeout;
 function ping()
 {
     socket.emit("ping");
-    pingTimeout = setTimeout(pingFailed, 2000);
+    pingTimeout = setTimeout(pingFailed, 3000);
 }
 
 socket.on('pong', () => {
@@ -105,7 +105,22 @@ socket.on('color', (R,G,B) => {
 });
 
 
+socket.on('mode', (mode) => {
 
+    if(mode == "playback")
+    {
+        content.style.transition = "10s ease";
+    }
+
+    else if(mode == 'organ')
+    {
+        content.style.transition = "0.1s ease";
+    }
+})
+
+socket.on('organ', (data) => {
+    playOrgan(data.pitch, data.velocity);
+})
 
 
 
@@ -132,6 +147,7 @@ socket.on('color', (R,G,B) => {
 */
 
 let SOUNDS = [];
+let ORGANSOUNDS = [];
 let currentSound = 0;
 
 function playSound(sound)
@@ -160,7 +176,21 @@ function stopSound()
     DBG(`stopping sound ${currentSound}`);
 }
 
+function playOrgan(pitch, velocity)
+{
+    if(velocity > 0)
+    {
+        ORGANSOUNDS[pitch].play();
+        ORGANSOUNDS[pitch].volume(velocity);
+        setColor(255,255,255);
+    }
 
+    else
+    {
+        ORGANSOUNDS[pitch].stop();
+        setColor(0,0,0);
+    }
+}
 
 
 function loadSounds(voiceid)
@@ -182,6 +212,19 @@ function loadSounds(voiceid)
             incrementSFLoaded();
            }
       }); 
+
+      for(let i = 0; i < 25; ++i)
+      {
+        ORGANSOUNDS[i] = new Howl({
+            src: [`Samples/organ/OG_${i}.mp3`],
+            html5: true,
+            loop: true,
+            onload: function() {
+                incrementSFLoaded();
+               }
+          }); 
+      }
+
 }
 
 let soundfilesLoaded = 0;
@@ -190,7 +233,7 @@ function incrementSFLoaded()
     soundfilesLoaded++;
     progress.setAttribute('value', soundfilesLoaded);
 
-    if(soundfilesLoaded == 2)
+    if(soundfilesLoaded == 26)
     {
         progress.style.display = "none";
         connectBtn.style.display = "block";
@@ -221,7 +264,7 @@ connectBtn.onclick = () =>
     setTimeout(() => {
         document.getElementById('connect_btn').classList.add('grow');
         document.getElementById('logo').classList.add('grow');
-    }, 250);
+    }, 750);
 
     isConnected = true;
 
@@ -229,7 +272,7 @@ connectBtn.onclick = () =>
     document.getElementById('connect_btn').style.display = "none";
     document.getElementById('logo').style.display = "none";
     document.getElementById('content').style.visibility = "visible";
-    }, 600)
+    }, 1000)
 
     // wakelock
     if ('wakeLock' in navigator) {
@@ -262,7 +305,7 @@ function DBG(msg)
 {
     if(bDBG)
     {
-        console.log(msg);
+        //console.log(msg);
         //debugHeader.textContent = msg;
     }
      

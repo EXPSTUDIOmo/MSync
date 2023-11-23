@@ -143,10 +143,18 @@ oscServer.on('message', function (msg) {
       oscToMax.send("/users", clients.length);
       break;
 
-      
+    case '/mode':
+      let mode = msg[1];
+      setMode(mode);
+      break;
+
+    case '/organ':
+      let voice = msg[1];
+      let pitch = msg[2];
+      let velocity = msg[3];
+      playOrgan(voice, pitch, velocity);
       break;
   }
-
 });
 
 
@@ -173,6 +181,19 @@ function stopPlayback()
   io.emit('stop');
 }
 
+function playOrgan(voice, pitch, velocity)
+{
+  if(clients[voice])
+  {
+    clients[voice].emit('organ', {pitch: pitch, velocity: velocity});
+  }
+}
+
+function setMode(mode)
+{ 
+  console.log("mode", mode);
+  io.emit('mode', mode);
+}
 
 
 
@@ -182,3 +203,8 @@ function setClientColors(R,G,B)
 }
 
 
+function getRandomInt(min, max) {
+  min = Math.ceil(min);
+  max = Math.floor(max);
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}

@@ -147,7 +147,7 @@ body {
     width: 100vw;
     height: 100vh;
     visibility: hidden;
-    transition: background-color 10s ease;
+    transition: 10s ease;
 }
 
 #matrixcanvas {
