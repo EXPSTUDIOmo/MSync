@@ -198,7 +198,7 @@ function loadSounds(voiceid)
     DBG(`loading sounds for voice ${voiceid+1}`);
 
     SOUNDS[0] = new Howl({
-        src: [`Samples/vincze/FL_${voiceid+1}.mp3`],
+        src: [`Samples/vincze/FL_handy${voiceid+1}.mp3`],
         html5: true,
         onload: function() {
            incrementSFLoaded();
@@ -206,24 +206,20 @@ function loadSounds(voiceid)
       }); 
 
     SOUNDS[1] = new Howl({
-        src: [`Samples/vincze/CP_${voiceid+1}.mp3`],
+        src: [`Samples/vincze/FL_${voiceid}.mp3`],
         html5: true,
         onload: function() {
             incrementSFLoaded();
            }
-      }); 
+      });
 
-      for(let i = 0; i < 25; ++i)
-      {
-        ORGANSOUNDS[i] = new Howl({
-            src: [`Samples/organ/OG_${i}.mp3`],
-            html5: true,
-            loop: true,
-            onload: function() {
-                incrementSFLoaded();
-               }
-          }); 
-      }
+    SOUNDS[2] = new Howl({
+        src: [`Samples/vincze/notification MM_${voiceid}.mp3`],
+        html5: true,
+        onload: function() {
+            incrementSFLoaded();
+           }
+      });
 
 }
 
@@ -233,14 +229,10 @@ function incrementSFLoaded()
     soundfilesLoaded++;
     progress.setAttribute('value', soundfilesLoaded);
 
-    if(soundfilesLoaded == 26)
+    if(soundfilesLoaded >= 2)
     {
         progress.style.display = "none";
         connectBtn.style.display = "block";
-
-        pulses[0].style.animationIterationCount = "1";
-        pulses[1].style.animationIterationCount = "1";
-
     }
 }
 
@@ -260,6 +252,8 @@ connectBtn.onclick = () =>
     socket.emit("activate");
     document.getElementById('connect_btn').style.color = "green";
     document.getElementById('connect_btn').innerHTML = "&#10003";
+    pulses[0].style.animationIterationCount = "1";
+    pulses[1].style.animationIterationCount = "1";
 
     setTimeout(() => {
         document.getElementById('connect_btn').classList.add('grow');
