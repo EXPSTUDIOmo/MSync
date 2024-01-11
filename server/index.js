@@ -181,20 +181,12 @@ function stopPlayback()
   io.emit('stop');
 }
 
-function playOrgan(voice, pitch, velocity)
-{
-  if(clients[voice])
-  {
-    clients[voice].emit('organ', {pitch: pitch, velocity: velocity});
-  }
-}
 
 function setMode(mode)
 { 
   console.log("mode", mode);
   io.emit('mode', mode);
 }
-
 
 
 function setClientColors(R,G,B)

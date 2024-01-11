@@ -1,56 +1,67 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 * {
     margin: 0;
     padding: 0;
+  
 }
+
+@font-face {
+    font-family: 'Chathura-Light';
+    src: url("fonts/Chathura-Light.ttf") format('truetype');
+    font-weight: lighter;
+}
+
+@font-face {
+    font-family: 'Chathura-Regular';
+    src: url("fonts/Chathura-Regular.ttf") format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Chathura-Bold';
+    src: url("fonts/Chathura-Bold.ttf") format('truetype');
+    font-weight: 700;
+    font-style: bold;
+}
+
+@font-face {
+    font-family: 'Chathura-ExtraBold';
+    src: url("fonts/Chathura-ExtraBold.ttf") format('truetype');
+    font-weight: 800;
+    font-style: bold;
+}
+
+@font-face {
+    font-family: 'cs-regular';
+    src: url("fonts/cs_regular.ttf") format('truetype');
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Optimus';
+    src: url("fonts/Optimus.otf") format('otf');
+    font-weight: 400;
+    font-style: normal;
+}
+
+.chatura-scale {
+    font-size: 200%; /* Adjust the percentage to scale the font size */
+  }
 
 html {
     overflow: hidden;
 }
 
 body {
-    background-color: black;
-  
+    font-family: "Chathura-Regular", Arial, Helvetica, sans-serif;
 }
 
-#logo {
-    position: absolute;
-    top: 2vh;
-    left: 0;
-    right: 0;
-    margin: auto;
-}
 
-#logo2 {
-    position: absolute;
-    top: 10vh;
-    left: 0;
-    right: 0;
-    margin: auto;
-    display: none;
-    transition: opacity 1s ease;
-    opacity: 0;
-}
-
-#connect_btn {
-    display: none;
-    width: 50vw;
-    max-width: 300px;
-    height: 50vw;
-    max-height: 300px;
-    position: absolute;
-    border-radius: 100%;
-    font-size: 2.5rem;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    margin: auto auto;
-    color: black;
-    z-index: 2;
-    background-color: white;
-    font-family: Arial;
-    font-weight: bold;
-}
 
 #progress {
     position: absolute;
@@ -64,107 +75,82 @@ body {
     background-color: green;
 }
 
-#logo {
-    max-width: 500px;
-}
+
+
+
+
+
+.spinner {
+    width: 56px;
+    height: 56px;
+    display: grid;
+    border: 4.5px solid #0000;
+    border-radius: 50%;
+    border-right-color: #ffffff;
+    animation: spinner-a4dj62 1s infinite linear;
+ }
+ 
+ .spinner::before,
+ .spinner::after {
+    content: "";
+    grid-area: 1/1;
+    margin: 2.2px;
+    border: inherit;
+    border-radius: 50%;
+    animation: spinner-a4dj62 2s infinite;
+ }
+ 
+ .spinner::after {
+    margin: 8.9px;
+    animation-duration: 3s;
+ }
+ 
+ @keyframes spinner-a4dj62 {
+    100% {
+       transform: rotate(1turn);
+    }
+ }
+
+
+
+
+
 
 
 .pulse {
-    position: absolute;
-    height: 50vw;
-    width: 50vw;
-    left: 25%;
-    top: 36%;
+    top: 0;
     opacity: 0;
-    border: 3px solid white;
+    border: 2px solid white;
     border-radius: 50%;
-    -webkit-animation: pulsate 2s ease-out;
+    -webkit-animation: pulsate 4s ease-in-out;
     -webkit-animation-iteration-count: infinite;
-    animation: pulsate 2s ease-out;
+    animation: pulsate 4s ease-in-out;
     animation-iteration-count: infinite;
-}
-  
-.pulse_play {
-    position: absolute;
-    display: none;
-    height: 50vw;
-    width: 50vw;
-    left: 25%;
-    top: 36%;
-    opacity: 0;
-    border: 3px solid rgba(205, 205, 205, 0.33);
-    border-radius: 50%;
-    -webkit-animation: pulsate 2s ease-out;
-    -webkit-animation-iteration-count: infinite;
-    animation: pulsate 4s ease-out;
-    animation-iteration-count: infinite;
-    transition: border 5s ease;
 }
 
 .pulse2 {
-    -webkit-animation-delay: 0.8s;
-    animation-delay: 0.8s;
+    -webkit-animation-delay: 1s;
+    border: 1px solid white;
+    animation-delay: 1s;
 }
 
 
 
 @keyframes pulsate {
 0% {
-    transform: scale(0.1, 0.1);
+    transform: scale(1, 1);
     opacity: 0.0;
 }
 50% {
     opacity: 1.0;
 }
 100% {
-    transform: scale(1.3, 1.3);
+    transform: scale(1.5, 1.5);
     opacity: 0.0;
 }
 }
 
 
-
-
-
-@media (orientation: landscape)
-{
-    #connect_btn {
-        font-size: 2rem;
-        max-width: 150px;
-        max-height: 150px;
-        top: 15%;
-        bottom: 0;
-    }
-
-    #logo {
-        max-width: 200px;
-    }
-}
-
-#content {
-    position: relative;
-    background-color: black;
-    width: 100vw;
-    height: 100vh;
-    visibility: hidden;
-    transition: 10s ease;
-}
-
-#matrixcanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1
-}
-
-#bgcanvas {
-    position: absolute;
-    top: 0;
-    left: 0;
-    z-index: 2
-}
 
 .grow {
     animation-name: button_grow;
@@ -180,3 +166,174 @@ body {
     100% { transform: scale(0);}
 }
 
+
+
+.hypnotic {
+    width: 67.2px;
+    height: 28px;
+    border: 2.2px solid #ffffff;
+    border-radius: 50%;
+    display: grid;
+    animation: hypnotic-ds34hk 17s infinite linear;
+ }
+ 
+ .hypnotic:before,
+ .hypnotic:after {
+    content: "";
+    grid-area: 1/1;
+    border: inherit;
+    border-radius: 50%;
+    animation: inherit;
+    animation-duration: 13s;
+ }
+ 
+ .hypnotic:after {
+    --s: -1;
+ }
+ 
+ @keyframes hypnotic-ds34hk {
+    100% {
+       transform: rotate(calc(var(--s,1)*1turn));
+    }
+ }
+
+
+
+
+ .chatstartanim {
+    -webkit-animation: chatstart 1s ease-in-out;
+    -webkit-animation-iteration-count: 1;
+    animation: chatstart 1s ease-in-out;
+    animation-iteration-count: 1;
+ }
+
+ @keyframes chatstart {
+    0% {
+        transform: scale(0);
+    }
+    50% {
+        transform: scale(1);
+    }
+    60%, 70%, 80%, 90%, 100% {
+        transform: scale(1) rotate(0);
+    }
+    65%, 85% {
+        transform: scale(1) rotate(-3deg); /* Adjust the wiggle angle */
+    }
+    75%, 95% {
+        transform: scale(1) rotate(3deg); /* Adjust the wiggle angle */
+    }
+ }
+
+
+
+
+
+
+ /*
+    CHAT
+ */ 
+
+#chatcontent {
+    scroll-behavior: smooth;
+}
+
+.chat-bg {
+    background: linear-gradient(180deg, #280528 0%, #12041E 100%);
+}
+
+.chat-title {
+    background: #750275;
+    box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.12);
+    color: #D308D3; 
+    filter: blur(0.5px); 
+    font-size: 2.5rem;
+    height: 3rem;
+    padding: 0.5rem;
+}
+
+ .chat-header {
+    border-radius: 0px 0px 5px 5px;
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    background: linear-gradient(180deg, #450045 0%, #370137 100%);
+    box-shadow: 0px 4px 4px 0px rgba(89, 89, 89, 0.25);
+    height: 4.5rem;
+ }
+
+.chatmessage {
+    max-width: 70%;
+    width: fit-content;
+}
+
+ .chatbubble_a {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+ .chatbubble_b {
+    position: relative;
+    padding: 0.5rem;
+    border-radius: 1rem;
+    box-shadow:	0 0.125rem 0.5rem rgba(0, 0, 0, .3), 0 0.0625rem 0.125rem rgba(0, 0, 0, .2);
+}
+
+
+.chatbubble_a::before {
+	content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 20%;
+    right: 98%;
+    border: 0.75rem solid transparent;
+    border-right: none;
+    border-bottom-color: #fff;
+    /* filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1)); */
+    z-index: 0;
+}
+
+.chatbubble_b::before {
+	content: '';
+    position: absolute;
+    width: 0;
+    height: 0;
+    bottom: 20%;
+    left: 98%;
+    border: 0.75rem solid transparent;
+    border-left: none;
+    border-bottom-color: #fff;
+    /* filter: drop-shadow(0 -0.0625rem 0.0625rem rgba(0, 0, 0, .1)); */
+    z-index: 0;
+}
+
+
+.dots {
+   width: 3rem;
+   height: 1.25rem;
+   background: radial-gradient(circle closest-side,#000000 90%,#0000) 0%   50%,
+          radial-gradient(circle closest-side,#000000 90%,#0000) 50%  50%,
+          radial-gradient(circle closest-side,#000000 90%,#0000) 100% 50%;
+   background-size: calc(100%/3) 6px;
+   background-repeat: no-repeat;
+   animation: dots-7ar3yq 1s infinite linear;
+}
+
+@keyframes dots-7ar3yq {
+   20% {
+      background-position: 0%   0%, 50%  50%,100%  50%;
+   }
+
+   40% {
+      background-position: 0% 100%, 50%   0%,100%  50%;
+   }
+
+   60% {
+      background-position: 0%  50%, 50% 100%,100%   0%;
+   }
+
+   80% {
+      background-position: 0%  50%, 50%  50%,100% 100%;
+   }
+}

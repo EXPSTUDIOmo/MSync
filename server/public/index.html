@@ -1,26 +1,115 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>>> |||| EXP</title>
-    <script type="text/javascript" src="/js/howler.min.js"></script>
+    <title>FREEDOM COLLECTIVE</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     <script type="text/javascript" src="/js/socket.io.js"></script>
     <script src="NoSleep.min.js"></script>
     <script defer src="/js/client.js" type="module"></script>
-    <link rel="stylesheet" href="/css/styles.css">
+    <link href="/dist/output.css" rel="stylesheet">
+
   </head>
-  <body>
-    <!--<h1 id="debug" style="color:red">Heureka</h1>-->
-    <div id="start_screen">
-       <img id="logo" src="exp_logo_black.jpg" width="70%" alt="SWR EXPERIMENTALSTUDIO">
-       <button id="connect_btn" onclick="connect()">CONNECT</button>
-       <div class='pulse'></div>
-       <div class='pulse pulse2'></div>
-       <progress id="progress" max="2" value="0"></progress>
-    </div>
-    <div id="content">
-      <div class='pulse_play'></div>
-      <div class='pulse_play pulse2'></div>
-      <img id="logo2" src="exp_logo_black.jpg" width="70%" alt="SWR EXPERIMENTALSTUDIO">
+  <body class="bg-gray-800">
+ 
+      <div id="startscreen" class="relative flex justify-center items-center w-screen h-screen">
+
+        <h1 class="absolute text-white font-ChaturaExtraBold text-6xl top-10">FREEDOM COLLECTIVE</h1>
+        <div id="loading_container" class="flex justify-center items-center flex-col">
+          <div class="spinner"></div>
+          <h1 class="text-white text-5xl mt-12 ">Loading</h1>
+        </div>
+       
+        
+        <div id="connect_btn_container" class="relative hidden">
+          <button id="connect_btn" class="bg-white text-black text-5xl w-36 h-36 font-ChaturaBold py-2 px-2 rounded-full z-10">
+            CONNECT
+          </button>
+          <div class="pulse absolute w-36 h-36 pointer-events-none"></div>
+          <div class="pulse pulse2 absolute w-36 h-36 pointer-events-none"></div>
+        </div>
+      </div>  
+    
+
+    <div id="content" class="relative flex justify-center items-center w-screen h-screen bg-gray-800 hidden">
+
+      <div id="waitscreen" class="relative flex justify-center items-center w-screen h-screen bg-gray-800">
+        <h2 class="absolute text-white font-ChaturaExtraBold text-8xl top-10">Connected</h2>
+        <h3 class="absolute text-white font-ChaturaExtraBold text-5xl top-32">Waiting...</h3>
+        <div class="hypnotic"></div>
+      </div>
+
+      <div id="incomingchat" class="container relative block w-9/12 hidden border-solid border-4 border-white rounded-2xl px-4 py-4 chatstartanim cursor-pointer" style="background-color: rgba(66, 0, 40, 0.35);">
+        <h1 class="text-white font-ChaturaExtraBold text-5xl text-center w-full">Unread Messages</h1>
+        <img src="img/incomingchat_purple.png" width="80px" class="top-0 right-0">
+      </div>
+
+      <div id="chatscreen" class="flex flex-col w-full h-full chat-bg hidden pb-28">
+
+        <div id="chattitle" class="flex items-center w-full chat-title">
+          <h1>FREEDOM CHAT</h1>
+        </div>
+
+        <div id="chatheader" class="flex justify-between chat-header px-2 py-2">
+          <div class="flex items-center space-x-2">
+            <div id="chatavatar" class="rounded-full w-16 h-16 border-solid border border-white">
+              <img src="img/avtarszusi.png" class="w-full h-full rounded-full">
+            </div>
+            <h1 class="text-white text-5xl ml-4">ZSZUSI</h1>
+          </div>
+          
+          <div class="flex items-center space-x2">
+            <img src="img/videocall.png" class="w-10">
+            <img src="img/phonecall.png" class="w-6 h-6 ml-4">
+            <img src="img/Menu.png" class="w-5 ml-4">
+          </div>
+        
+        </div>
+
+        <!-- CHAT CONTENT -->
+        <div id="chatcontent" class="overflow-y-auto bg-red w-full h-full pt-4 px-4 pb-28">
+<!--        
+          <div class="chatmessage mb-3">
+            <h1 class="text-white text-2xl ml-2">SZUSI</h1>
+            <div class="chatbubble_a bg-white">
+              <p class="text-black text-3xl"><div class="dots"></div></p>
+            </div>
+          </div>
+        
+
+          <div class="chatmessage mr-2 ml-auto">
+            <h1 class="text-white text-2xl ml-2 text-right">KARL</h1>
+            <div class="chatbubble_b bg-white">
+              <p class="text-black text-3xl from-me"> Zsuzsi?</p>
+            </div>
+          </div>  -->
+          <!--
+          <div class="chatmessage mb-3">
+            <h1 class="text-white text-2xl ml-2">SZUSI</h1>
+            <div class="chatbubble_a bg-white">
+              <p class="text-black text-2xl leading-none">JKASHGFHKJASGHFAK JSFGHAKJSFGH JKASFGHA JKSFGAJKSFHGASKJF 😘</p>
+            </div>
+          </div>
+          
+          <div class="chatmessage mr-2 ml-auto">
+            <h1 class="text-white text-2xl ml-2 text-right">KARL</h1>
+            <div class="chatbubble_b bg-white">
+              <p class="text-black text-3xl from-me"> FSAKLHJKJHASFKHJAS FKHJASH KJFASHKFJ HKSAJFKHJAFS KHJAFSKHJA SFKHJASFKHJ</p>
+            </div>
+          </div>
+
+          <div class="chatmessage mb-3">
+            <h1 class="text-white text-2xl ml-2">SZUSI</h1>
+            <div class="chatbubble_a bg-white">
+              <p class="text-black text-3xl">JKASHGFHKJASGHFAK JSFGHAKJSFGH JKASFGHA JKSFGAJKSFHGASKJF 😘</p>
+            </div>
+          </div> -->
+
+        </div>
+          
+        </div>
+
+      </div>
+      
     </div>
   </body>
 </html>
