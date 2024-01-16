@@ -12,15 +12,17 @@
 */
 
 
-
 // **************** Server setup ****************************
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const app = express();
 const http = require('http');
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+
+
 const { Server } = require("socket.io");
-const io = new Server(server);
-const timesyncServer = require('timesync/server');
+const io = new Server(httpServer);
 
 app.use(express.static('public'));
 
@@ -29,10 +31,13 @@ app.get('/', (req, res) => {
 });
 
 
-
-server.listen(80, () => {
-  console.log('listening on *:80');
+httpServer.listen(80, () => {
+  console.log('*** HTTP-SERVER ON PORT 80 STARTED AND LISTENING ***');
 });
+
+
+
+
 
 
 
@@ -57,7 +62,7 @@ function getNextVoice()
 
 let clients = []; // list of all connected clients
 let lastStartTime= 0; // if we are currently playing, time of last started soundfile
-let currentSoundfile = 0;
+let currentScene = 0;
 let isPlaying = false;
 
 
@@ -78,11 +83,9 @@ io.on('connection', (socket) => {
 
   socket.on('activate', () => {
 
-    if(isPlaying)
-    {
-      let timeToJump = (Date.now() - lastStartTime) / 1000; // Howler wants seconds
-      socket.emit("activation", { playing: isPlaying, sound: currentSoundfile, time: timeToJump});
-    }
+    let timeToJump = isPlaying ? (Date.now() - lastStartTime) / 1000 : 0; 
+    socket.emit("activation", { playing: isPlaying, scene: currentScene, time: timeToJump});
+    
  })
 
  socket.on('ping', () => {
@@ -106,10 +109,10 @@ io.on('connection', (socket) => {
 const OSCserver = require('node-osc').Server;
 const OSCClient = require('node-osc').Client;
 
-const oscToMax = new OSCClient('10.31.13.57', 5555); // TODO evtl. dynamisch wenn nicht auf gleichem Rechner wie Max
+const oscToMax = new OSCClient('127.0.0.1', 5555); // TODO evtl. dynamisch wenn nicht auf gleichem Rechner wie Max
 
 let oscServer = new OSCserver(3333, '0.0.0.0', () => {
-  console.log('OSC Server is listening');
+  console.log('*** OSC CONNECTION STARTED AND LISTENING ON PORT 3333 ***');
 });
 
 
@@ -120,11 +123,10 @@ oscServer.on('message', function (msg) {
 
   switch(AP)
   {
-    case '/start':
-      
-      currentSoundfile = msg[1];
-      startPlayback(currentSoundfile);
-      oscToMax.send('/server', "started sound");
+    case '/start':   
+      currentScene = msg[1];
+      loadScene(currentScene);
+      oscToMax.send('/server', `started scene ${currentScene}`);
       break;
     
     case '/stop':
@@ -164,12 +166,20 @@ oscServer.on('message', function (msg) {
 
 // ================================= Client Control =========================
 
-function startPlayback(soundID)
+function loadScene(scene)
 {
-  lastStartTime = Date.now();
-  isPlaying = true;
+  if(scene === 0)
+  {
+    isPlaying = false;
+  }
 
-  io.emit('start', soundID);
+  else
+  {
+    lastStartTime = Date.now();
+    isPlaying = true;
+  }
+
+  io.emit('start', scene);
 }
 
 

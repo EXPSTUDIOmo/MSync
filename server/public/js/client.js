@@ -8,13 +8,49 @@
     Client
 */
 
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        // Generate a random index lower than the current element
+        const j = Math.floor(Math.random() * (i + 1));
 
+        // Swap elements at indices i and j
+        [array[i], array[j]] = [array[j], array[i]];
+    }
+    return array;
+}
+
+function randomTransform() {
+    const randomX = Math.floor(Math.random() * 200) - 100; // Random X translation
+    const randomY = Math.floor(Math.random() * 200) - 100; // Random Y translation
+    const randomRotation = Math.floor(Math.random() * 180) -90; // Random rotation
+
+    const transformStyle = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+    document.getElementById('wait_text').style.transform = transformStyle;
+}
+
+setInterval(() => {
+    shuffleArray(letterDelays);
+}, 6000);
+
+setInterval(() => {
+    randomTransform();
+}, 4000);
+/*
+    CSS PRECALCS
+*/
+let letterDelays = [0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8];
+shuffleArray(letterDelays);
+
+document.querySelectorAll('.wait_text span').forEach((span, idx) => {
+
+    span.style.animationDelay = `${letterDelays[idx]}s`;
+});
 
 /*
 Debug Flag, wenn activ wird die DBG() Funktion ausgeführt, so kann man schnell global 
 alle console.logs() aktivieren bzw. deaktivieren
 */
-const bDBG = false;
+const bDBG = true;
 
 //const debugHeader = document.getElementById('debug'); // nur zum debuggen, TODO: Löschen
 const progress = document.getElementById('progress');
@@ -22,8 +58,58 @@ const connectBtn = document.getElementById('connect_btn_container');
 const incomingchat = document.getElementById('incomingchat');
 const content = document.getElementById('content');
 const chatcontent = document.getElementById('chatcontent');
-let pulses = document.getElementsByClassName('pulse');
-let pulses_play = document.getElementsByClassName('pulse_play');
+const chatscreen = document.getElementById('chatscreen');
+const videoscreen = document.getElementById('videoscreen');
+const waitscreen = document.getElementById('waitscreen');
+const pulses = document.getElementsByClassName('pulse');
+const pulses_play = document.getElementsByClassName('pulse_play');
+
+const video_1 = document.getElementById('video_1');
+const video_2 = document.getElementById('video_2');
+
+const VIDEO_SOURCES_POSES = 
+[
+    'scaled_Alle_Dach_video.mp4',
+    'scaled_Andrei_1_video.mp4',
+    'scaled_Andrei_2_video.mp4',
+    'scaled_Andrei_Foyer_Nebel_video.mp4',
+    'scaled_Andrei_Zwischendach_1_video.mp4',
+    'scaled_Andrei_Zwischendach_2_video.mp4',
+    'scaled_Fan_1_video.mp4',
+    'scaled_Fan_2_video.mp4',
+    'scaled_Karl_1_video.mp4',
+    'scaled_Karl_2_video.mp4',
+    'scaled_Opponent_Markus_1_video.mp4',
+    'scaled_Opponent_Martin_1_video.mp4',
+    'scaled_Opponent_Martin_2_video.mp4',
+    'scaled_Secretary_1_video.mp4',
+    'scaled_Secretary_2_video.mp4',
+    'scaled_Secretary_3_video.mp4',
+    'scaled_Zsuzsi_1_video.mp4',
+    'scaled_Zsuzsi_4_video.mp4'
+];
+
+
+const VIDEO_SOURCES_DACH = 
+[
+    'scaled_Dach_1_video.mp4',
+    'scaled_Dach_3_video.mp4',
+    'scaled_Dach_4_video.mp4',
+]
+
+
+
+let numVideosInScene = VIDEO_SOURCES_POSES.length;
+
+videoscreen.addEventListener('click', () => {
+    playVideo();
+})
+
+
+
+
+
+
 
 
 
@@ -90,13 +176,15 @@ function pingFailed()
 socket.on('activation', (state) => {
     let isPlaying = state.playing;
     let time = state.time;
-    let file = state.sound;
+    currentScene = state.scene;
+    preloadVideo(currentScene);
 
     if(isPlaying)
     {
-        SOUNDS[file].currentTime = time;
-        playSound(file);
-        DBG(`jump to ${time}`);
+        let sound = currentScene - 1;
+        loadScene(currentScene);
+        SOUNDS[sound].currentTime = time;
+        DBG(`jump to ${time} on sound ${sound}`);
     }
 });
 
@@ -105,23 +193,69 @@ socket.on('disconnect', (data) => {
     DBG("disconnected from server. please refresh the page");
 });   
 
-socket.on('start', (sound) => {
+socket.on('start', (scene) => {
     
-    if(sound == 2)
-    {
-        showIncomingChat();
-    }
-
-    else
-    {
-        hideChat();
-    }
-
-    playSound(sound);
+    loadScene(scene);
 });
 
+
+function loadScene(scene)
+{
+    currentScene = scene;
+    stopAllSound();
+    stopVideos();
+
+    switch(scene)
+    {
+        case 0:
+            showWaitScreen();
+            stopAllSound();
+            numVideosInScene = VIDEO_SOURCES_POSES.length;
+            stopVideos();
+            break;
+        case 1:
+            waitscreen.style.display = "none";
+            chatscreen.style.display = "none";
+            incomingchat.style.display = "none";
+            videoscreen.style.display = "block";
+            playVideo();
+            playSound(0);
+            break;
+        case 2:
+            waitscreen.style.display = "none";
+            videoscreen.style.display = "none";
+            chatscreen.style.display = "none";
+            preloadVideo(3);
+            showIncomingChat();
+            playSound(1);
+            break;
+        case 3:
+            waitscreen.style.display = "none";
+            chatscreen.style.display = "none";
+            incomingchat.style.display = "none";
+            videoscreen.style.display = "block";
+            numVideosInScene = VIDEO_SOURCES_DACH.length;
+            playSound(2);
+            playVideo();
+            break;
+        default:
+            break;
+    }
+}
+
+function showWaitScreen()
+{
+    videoscreen.style.display = "none";
+    incomingchat.style.display = "none";
+    chatscreen.style.display = "none";
+    waitscreen.style.display = "flex";
+}
+
+
 socket.on('stop', () => {
-    stopSound();
+    showWaitScreen();
+    stopAllSound();
+    stopVideos();
 });
 
 socket.on('color', (R,G,B) => {
@@ -172,19 +306,79 @@ socket.on('organ', (data) => {
 
 let SOUNDS = [];
 let ORGANSOUNDS = [];
-let currentSound = 0;
+let currentScene = 0;
 
 function playSound(sound)
 {
     SOUNDS[sound].play();
-    currentSound = sound;
+}
+
+let currentlyActivePlayer = 1;
+let currentVideo = 0;
+
+function preloadVideo(scene)
+{
+
+    if(scene === 1 || scene === 0)
+    {
+        video_1.src = `/Videos/${VIDEO_SOURCES_POSES[0]}`;
+    }
+
+    else
+    {
+        video_1.src = `/Videos/${VIDEO_SOURCES_DACH[0]}`;
+    }
+
+    currentVideo = 0;
+    currentlyActivePlayer = 0;
+}
+
+function playVideo()
+{
+    currentVideo = (currentVideo + 1) %  numVideosInScene;
+
+    if(currentlyActivePlayer === 0)
+    {
+        video_1.play();
+        video_1.classList.remove('hidden');
+        
+        video_2.classList.add('hidden');
+        video_2.src = currentScene === 1 ? `/Videos/${VIDEO_SOURCES_POSES[currentVideo]}` : `/Videos/${VIDEO_SOURCES_DACH[currentVideo]}`;
+
+        currentlyActivePlayer = 1;
+    }
+
+    else
+    {
+        video_2.play();
+        video_2.classList.remove('hidden');
+        
+        video_1.classList.add('hidden');
+        video_1.src = currentScene === 1 ? `/Videos/${VIDEO_SOURCES_POSES[currentVideo]}` : `/Videos/${VIDEO_SOURCES_DACH[currentVideo]}`;
+
+        currentlyActivePlayer = 0;
+    }
+}
+
+function stopVideos()
+{
+    
 }
 
 function stopSound()
 {
-    SOUNDS[currentSound].stop();
+    SOUNDS[currentScene - 1].pause();
 
-    DBG(`stopping sound ${currentSound}`);
+    DBG(`stopping sound ${currentScene - 1}`);
+}
+
+function stopAllSound()
+{
+    for(let sound of SOUNDS)
+    {
+        sound.pause();
+        sound.currentTime = 0;
+    }
 }
 
 function playOrgan(pitch, velocity)
@@ -203,53 +397,13 @@ function playOrgan(pitch, velocity)
     }
 }
 
+let loadTimeout;
 
 function loadSounds(voiceid)
 {
-
-
-    SOUNDS[0] = loadSound(`Samples/vincze/FL_handy${voiceid+1}.mp3`);
-    SOUNDS[1] = loadSound(`Samples/vincze/FL_${voiceid}.mp3`);
-    SOUNDS[2] = loadSound(`Samples/vincze/notification MM_${voiceid}.mp3`);
-
-    // DBG(`loading sounds for voice ${voiceid+1}`);
-
-    // SOUNDS[0] = new Howl({
-    //     src: [`Samples/vincze/FL_handy${voiceid+1}.mp3`],
-    //     html5: true,
-    //     onloaderror: (id, error) => {
-    //         console.error(id, error);
-    //         console.log("ERROR ON LOAD");
-    //     },
-    //     onload: function() {
-    //        incrementSFLoaded();
-    //       }
-    //   }); 
-
-    // SOUNDS[1] = new Howl({
-    //     src: [`Samples/vincze/FL_${voiceid}.mp3`],
-    //     html5: true,
-    //     onloaderror: (id, error) => {
-    //         console.error(id, error);
-    //         console.log("ERROR ON LOAD");
-    //     },
-    //     onload: function() {
-    //         incrementSFLoaded();
-    //        }
-    //   });
-
-    // SOUNDS[2] = new Howl({
-    //     src: [`Samples/vincze/notification MM_${voiceid}.mp3`],
-    //     html5: true,
-    //     onloaderror: (id, error) => {
-    //         console.error(id, error);
-    //         console.log("ERROR ON LOAD");
-    //     },
-    //     onload: function() {
-    //         incrementSFLoaded();
-    //        }
-    //   });
-
+    SOUNDS[0] = loadSound(`Samples/PNO/PNO_H_${voiceid+1}.mp3`);
+    SOUNDS[1] = loadSound(`Samples/NOT/NOT_H_${voiceid+1}.mp3`);
+    SOUNDS[2] = loadSound(`Samples/FLT/FLT_H_${voiceid+1}.mp3`);
 }
 
 const SoundfilesToLoad = 3;
@@ -269,9 +423,9 @@ function incrementSFLoaded()
 
 
 function loadSound(url, retryCount = 0) {
-    const maxRetries = 3; // Set a max number of retries to avoid infinite loops
+    const maxRetries = 5; // Set a max number of retries to avoid infinite loops
     const audio = new Audio(url);
-
+   
     audio.addEventListener('error', () => {
         console.error(`Error loading sound file: ${url}`);
 
@@ -279,7 +433,8 @@ function loadSound(url, retryCount = 0) {
             console.log(`Attempting to reload sound file. Retry ${retryCount + 1}`);
             loadSound(url, retryCount + 1); // Retry loading the sound
         } else {
-            console.error('Max retries reached. Could not load the sound file.');
+            location.reload();
+            console.error("ERROR LOADING SOUNDFILES");
             // Handle the failure, perhaps by notifying the user or disabling sound-related functionality
         }
     });
@@ -309,7 +464,6 @@ connectBtn.onclick = () =>
     if(isConnected)
         return;
 
-
     socket.emit("activate");
     document.getElementById('connect_btn').style.color = "green";
     document.getElementById('connect_btn').innerHTML = "&#10003";
@@ -323,9 +477,27 @@ connectBtn.onclick = () =>
     isConnected = true;
 
     setTimeout(() => {
-    document.getElementById('startscreen').style.display = "none";
-    document.getElementById('content').style.display = "flex";
+        document.getElementById('startscreen').style.display = "none";
+        document.getElementById('content').style.display = "flex";
+        goFullscreen();
+    }, 1200)
 
+    // wakelock
+    if ('wakeLock' in navigator) {
+        requestWakeLock();
+    } else {
+
+        if(detectMobile())
+        {
+            enableNoSleep();
+        }
+            
+    }
+}
+
+
+function goFullscreen()
+{
     if (!document.fullscreenElement) {
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen();
@@ -337,20 +509,21 @@ connectBtn.onclick = () =>
             document.documentElement.msRequestFullscreen();
         }
     }
+}
 
-    }, 1000)
-
-    // wakelock
-    if ('wakeLock' in navigator) {
-        requestWakeLock();
+function detectMobile() {
+    const ua = navigator.userAgent;
+    if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) {
+        return true;
     } else {
-        document.addEventListener('touchstart', enableNoSleep, false);
+        return false;
     }
 }
 
 
 function enableNoSleep()
 {
+    console.log("No sleep");
     noSleep.enable();
 }
 
@@ -367,10 +540,11 @@ function enableNoSleep()
 let IsInChat = false;
 
 
+// DEBUG
 // document.getElementById('waitscreen').style.display = "none";
 // document.getElementById('startscreen').style.display = "none";
 // document.getElementById('content').style.display = "flex";
-// document.getElementById('chatscreen').style.display = "flex";
+// document.getElementById('chatscreen').style.display = "none";
 
 
 function showIncomingChat()
@@ -378,7 +552,6 @@ function showIncomingChat()
     if(IsInChat)
         return;
 
-    document.getElementById('waitscreen').style.display = "none";
     document.getElementById('incomingchat').style.display = "flex";
 }
 
@@ -556,7 +729,7 @@ function DBG(msg)
 {
     if(bDBG)
     {
-        //console.log(msg);
+        console.log(msg);
         //debugHeader.textContent = msg;
     }
      

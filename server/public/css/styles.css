@@ -36,17 +36,22 @@
 }
 
 @font-face {
-    font-family: 'cs-regular';
-    src: url("fonts/cs_regular.ttf") format('truetype');
-    font-weight: 400;
+    font-family: 'Glitching';
+    src: url("fonts/GlitchingRegular.ttf") format('truetype');
+    font-weight: normal;
     font-style: normal;
 }
 
 @font-face {
-    font-family: 'Optimus';
-    src: url("fonts/Optimus.otf") format('otf');
-    font-weight: 400;
+    font-family: 'DoctorGlitch';
+    src: url("fonts/DoctorGlitch.otf") format('opentype');
+    font-weight: normal;
     font-style: normal;
+}
+
+@font-face {
+    font-family: 'GlitchCode';
+    src: url("fonts/GlitchCodeRegular.ttf") format('truetype');
 }
 
 .chatura-scale {
@@ -116,7 +121,6 @@ body {
 
 
 
-
 .pulse {
     top: 0;
     opacity: 0;
@@ -140,13 +144,16 @@ body {
 0% {
     transform: scale(1, 1);
     opacity: 0.0;
+    filter: blur(0px);
 }
 50% {
     opacity: 1.0;
+    filter: blur(1px);
 }
 100% {
     transform: scale(1.5, 1.5);
     opacity: 0.0;
+    filter: blur(7px);
 }
 }
 
@@ -167,35 +174,6 @@ body {
 }
 
 
-
-.hypnotic {
-    width: 67.2px;
-    height: 28px;
-    border: 2.2px solid #ffffff;
-    border-radius: 50%;
-    display: grid;
-    animation: hypnotic-ds34hk 17s infinite linear;
- }
- 
- .hypnotic:before,
- .hypnotic:after {
-    content: "";
-    grid-area: 1/1;
-    border: inherit;
-    border-radius: 50%;
-    animation: inherit;
-    animation-duration: 13s;
- }
- 
- .hypnotic:after {
-    --s: -1;
- }
- 
- @keyframes hypnotic-ds34hk {
-    100% {
-       transform: rotate(calc(var(--s,1)*1turn));
-    }
- }
 
 
 
@@ -336,4 +314,114 @@ body {
    80% {
       background-position: 0%  50%, 50%  50%,100% 100%;
    }
+}
+
+
+
+/* 
+.video {
+    object-fit: cover;
+} */
+
+
+
+
+
+
+.stack {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+  
+  .stack span {
+    grid-row-start: 1;
+    grid-column-start: 1;
+    --stack-height: calc(100% / var(--stacks) - 1px);
+    --inverse-index: calc(calc(var(--stacks) - 1) - var(--index));
+    --clip-top: calc(var(--stack-height) * var(--index));
+    --clip-bottom: calc(var(--stack-height) * var(--inverse-index));
+    clip-path: inset(var(--clip-top) 0 var(--clip-bottom) 0);
+    animation: stack 640ms cubic-bezier(.46,.29,0,1.24) 1 backwards calc(var(--index) * 120ms), glitch 5s ease infinite 2s alternate-reverse;
+  }
+  
+  .stack span:nth-child(odd) { --glitch-translate: 8px; }
+  .stack span:nth-child(even) { --glitch-translate: -8px; }
+  
+  @keyframes stack {
+    0% {
+      opacity: 0;
+      transform: translateX(-50%);
+      text-shadow: -2px 3px 0 red, 2px -3px 0 blue;
+    };
+    60% {
+      opacity: 0.5;
+      transform: translateX(50%);
+    }
+    80% {
+      transform: none;
+      opacity: 1;
+      text-shadow: 2px -3px 0 red, -2px 3px 0 blue;
+    }
+    100% {
+      text-shadow: none;
+    }
+  }
+  
+  @keyframes glitch {
+    0% {
+      text-shadow: -2px 3px 0 rgb(172, 172, 17rgb(105, 105, 105)2px -3px 0 rgb(119, 119, 119));
+      transform: translate(var(--glitch-translate));
+      filter: blur(0px);
+    }
+    2% {
+      text-shadow: 2px -3px 0 rgb(95, 95, 95),rgb(102, 102, 102)x 3px 0 rgb(126, 126, 126);
+      filter: blur(2px);
+    }
+    4%, 49% {  
+        text-shadow: none; transform: none; 
+        filter: blur(0px);
+    }
+    50%, 51% {
+        text-shadow: 2px -3px 0 rgb(89, 89, 89), -2px 3px 0 rgb(135, 135, 135);
+        transform: translate(var(--glitch-translate));
+        filter: blur(2px);
+    }
+
+    51%, 100% {
+        text-shadow: none; transform: none; 
+        filter: blur(0px);
+    }
+  }
+
+
+/* .wait_text {
+    animation: switchfont 1s infinite;
+} */
+
+.wait_text span {
+    display: inline-block;
+    animation: switchfont 6s infinite;
+    font-size: 4rem;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+@keyframes switchfont {
+    0%, 55% {
+        font-size: 4rem;
+        font-family: 'GlitchCode';
+        filter: blur(0px);
+    }
+
+    56%, 75% { 
+        font-size: 4rem;
+    
+        font-family: 'Glitching';
+        filter: blur(0px);
+    }
+
+    76%, 100% {
+        filter: blur(1px);
+        font-size: 4rem;
+    }
 }

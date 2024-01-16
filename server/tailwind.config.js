@@ -7,8 +7,9 @@ module.exports = {
       ChatReg: ['Chathura-Regular', 'sans-serif'],
       ChatBold: ['Chathura-Bold', 'sans-serif'],
       ChatExtraBold: ['Chathura-ExtraBold', 'sans-serif'],
-      csregular: ['cs-regular', 'sans-serif'],
-      Optimus: ['Optimus', 'sans-serif']
+      Glitching: ['Glitching', 'sans-serif'],
+      DoctorGlitch: ['DoctorGlitch', 'sans-serif'],
+      GlitchCode: ['GlitchCode', 'sans-serif']
     },
 
     fontSize: {
