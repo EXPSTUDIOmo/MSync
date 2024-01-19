@@ -9,33 +9,6 @@
 }
 
 @font-face {
-    font-family: 'Chathura-Light';
-    src: url("fonts/Chathura-Light.ttf") format('truetype');
-    font-weight: lighter;
-}
-
-@font-face {
-    font-family: 'Chathura-Regular';
-    src: url("fonts/Chathura-Regular.ttf") format('truetype');
-    font-weight: 400;
-    font-style: normal;
-}
-
-@font-face {
-    font-family: 'Chathura-Bold';
-    src: url("fonts/Chathura-Bold.ttf") format('truetype');
-    font-weight: 700;
-    font-style: bold;
-}
-
-@font-face {
-    font-family: 'Chathura-ExtraBold';
-    src: url("fonts/Chathura-ExtraBold.ttf") format('truetype');
-    font-weight: 800;
-    font-style: bold;
-}
-
-@font-face {
     font-family: 'Glitching';
     src: url("fonts/GlitchingRegular.ttf") format('truetype');
     font-weight: normal;
@@ -54,35 +27,114 @@
     src: url("fonts/GlitchCodeRegular.ttf") format('truetype');
 }
 
-.chatura-scale {
-    font-size: 200%; /* Adjust the percentage to scale the font size */
-  }
+
+@font-face {
+    font-family: 'SolwayRegular';
+    src: url("fonts/Solway-Regular.ttf") format('truetype');
+}
+
+@font-face {
+    font-family: 'SolwayBold';
+    src: url('fonts/Solway-Bold.ttf') format('truetype');
+}
+
+@font-face {
+    font-family: 'LoraVariable';
+    src: url('fonts/Lora-Variable.ttf') format('truetype');
+}
+
+
+@font-face {
+    font-family: 'Sanchez';
+    src: url('fonts/Sanchez-Regular.ttf') format('truetype');
+}
 
 html {
     overflow: hidden;
 }
 
-body {
-    font-family: "Chathura-Regular", Arial, Helvetica, sans-serif;
+
+.background {
+    background: linear-gradient(162deg, #900082 0.79%, #037878 100%);
+    animation: background-rotate 12s ease infinite;
+    background-size: 200% 200%;
 }
 
+.text-shadow {
+    text-shadow: 0px 4px 4.2px rgba(0, 0, 0, 0.448);
+}
 
+@keyframes background-rotate {
+    0% {
+		background-position: 0% 50%;
+	}
+	50% {
+		background-position: 100% 50%;
+	}
+	100% {
+		background-position: 0% 50%;
+	}
+}
 
-#progress {
+.connect_btn {
+    background: linear-gradient(145deg, rgba(0, 145, 177, 0.684) 17.08%, rgba(143, 35, 160, 0.25) 85.45%); 
+    stroke-width: 2px;
+    border: 1px solid rgba(255, 255, 255, 0.59);
+    color: white;
+    box-shadow: 3px 6px 4px 2px rgba(159, 185, 255, 0.146) inset;
+    filter: drop-shadow(0px 20px 15.7px rgba(0, 71, 255, 0.75)); 
+    animation: background-connect 6s ease infinite;
+    background-size: 150% 150%;
+}
+
+@keyframes background-connect {
+    0% {
+		background-position: 0% 50%;
+        filter: drop-shadow(0px 20px 15.7px rgba(0, 71, 255, 0.75)); 
+	}
+	50% {
+		background-position: 100% 50%;
+        filter: drop-shadow(0px 20px 15.7px rgba(225, 0, 255, 0.75)); 
+	}
+	100% {
+		background-position: 0% 50%;
+        filter: drop-shadow(0px 20px 15.7px rgba(0, 71, 255, 0.75)); 
+	}
+}
+
+.screen-avatar {
     position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
-    right: 0;
-    margin: auto auto;
-    width: 50%;
-    height: 5vh;
-    background-color: green;
+    animation: avatar 12s ease infinite;
+    opacity: 0;
 }
 
+.secretary {
+    bottom: 4rem;
+    right: 2rem;
+}
 
+.szusi {
+    bottom: 4.3rem;
+    left: 2rem;
+    animation-delay: 6s;
+}
 
+@keyframes avatar {
+    0%, 15% {
+        opacity: 0;
+        filter: blur(16px);
+    }
 
+    60%, 70% {
+        opacity: 0.3;
+        filter: blur(1px);
+    }
+
+    100% {
+        opacity: 0;
+        filter: blur(2px);
+    }
+}
 
 
 .spinner {
@@ -225,7 +277,7 @@ body {
     box-shadow: 0px 4px 4px 0px rgba(0, 0, 0, 0.12);
     color: #D308D3; 
     filter: blur(0.5px); 
-    font-size: 2.5rem;
+    font-size: 2rem;
     height: 3rem;
     padding: 0.5rem;
 }
@@ -318,10 +370,10 @@ body {
 
 
 
-/* 
+
 .video {
-    object-fit: cover;
-} */
+    pointer-events: none;
+}
 
 
 
@@ -351,7 +403,7 @@ body {
     0% {
       opacity: 0;
       transform: translateX(-50%);
-      text-shadow: -2px 3px 0 red, 2px -3px 0 blue;
+      
     };
     60% {
       opacity: 0.5;
@@ -360,35 +412,35 @@ body {
     80% {
       transform: none;
       opacity: 1;
-      text-shadow: 2px -3px 0 red, -2px 3px 0 blue;
+     
     }
     100% {
-      text-shadow: none;
+  
     }
   }
   
   @keyframes glitch {
     0% {
-      text-shadow: -2px 3px 0 rgb(172, 172, 17rgb(105, 105, 105)2px -3px 0 rgb(119, 119, 119));
+    
       transform: translate(var(--glitch-translate));
       filter: blur(0px);
     }
     2% {
-      text-shadow: 2px -3px 0 rgb(95, 95, 95),rgb(102, 102, 102)x 3px 0 rgb(126, 126, 126);
+      
       filter: blur(2px);
     }
     4%, 49% {  
-        text-shadow: none; transform: none; 
+       transform: none; 
         filter: blur(0px);
     }
     50%, 51% {
-        text-shadow: 2px -3px 0 rgb(89, 89, 89), -2px 3px 0 rgb(135, 135, 135);
+      
         transform: translate(var(--glitch-translate));
         filter: blur(2px);
     }
 
     51%, 100% {
-        text-shadow: none; transform: none; 
+        transform: none; 
         filter: blur(0px);
     }
   }
@@ -401,27 +453,20 @@ body {
 .wait_text span {
     display: inline-block;
     animation: switchfont 6s infinite;
-    font-size: 4rem;
     display: inline-block;
     vertical-align: middle;
 }
 
 @keyframes switchfont {
     0%, 55% {
-        font-size: 4rem;
-        font-family: 'GlitchCode';
         filter: blur(0px);
     }
 
     56%, 75% { 
-        font-size: 4rem;
-    
-        font-family: 'Glitching';
-        filter: blur(0px);
+        filter: blur(4px);
     }
 
     76%, 100% {
-        filter: blur(1px);
-        font-size: 4rem;
+        filter: blur(2px);
     }
 }

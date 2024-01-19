@@ -8,43 +8,69 @@
     Client
 */
 
-function shuffleArray(array) {
-    for (let i = array.length - 1; i > 0; i--) {
-        // Generate a random index lower than the current element
-        const j = Math.floor(Math.random() * (i + 1));
+// function shuffleArray(array) {
+//     for (let i = array.length - 1; i > 0; i--) {
+//         // Generate a random index lower than the current element
+//         const j = Math.floor(Math.random() * (i + 1));
 
-        // Swap elements at indices i and j
-        [array[i], array[j]] = [array[j], array[i]];
-    }
-    return array;
+//         // Swap elements at indices i and j
+//         [array[i], array[j]] = [array[j], array[i]];
+//     }
+//     return array;
+// }
+
+// function randomTransform() {
+//     const randomX = Math.floor(Math.random() * 200) - 100; // Random X translation
+//     const randomY = Math.floor(Math.random() * 200) - 100; // Random Y translation
+//     const randomRotation = Math.floor(Math.random() * 180) -90; // Random rotation
+
+//     const transformStyle = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
+//     document.getElementById('wait_text').style.transform = transformStyle;
+// }
+
+const avatarSecretary = document.getElementById('waitavatar_secretary');
+const avatarSzusi = document.getElementById('waitavatar_szusi');
+
+// setTimeout(() => {
+//     setInterval(moveSecretary, 12000);
+// }, 6000);
+
+
+
+// setTimeout(() => {
+//     setInterval(moveSzusi, 12000);
+// }, 12000)
+
+
+function moveSecretary()
+{
+    const randomX = Math.random() * 7;
+    const randomY = Math.random() * 9;
+    avatarSecretary.style.bottom = `${randomX}rem`;
+    avatarSecretary.style.right = `${randomY}rem`;
 }
 
-function randomTransform() {
-    const randomX = Math.floor(Math.random() * 200) - 100; // Random X translation
-    const randomY = Math.floor(Math.random() * 200) - 100; // Random Y translation
-    const randomRotation = Math.floor(Math.random() * 180) -90; // Random rotation
-
-    const transformStyle = `translate(${randomX}px, ${randomY}px) rotate(${randomRotation}deg)`;
-    document.getElementById('wait_text').style.transform = transformStyle;
+function moveSzusi()
+{
+    const randomX = Math.random() * 7;
+    const randomY = Math.random() * 9;
+    avatarSzusi.style.bottom = `${randomX}rem`;
+    avatarSzusi.style.right = `${randomY}rem`;
 }
 
-setInterval(() => {
-    shuffleArray(letterDelays);
-}, 6000);
-
-setInterval(() => {
-    randomTransform();
-}, 4000);
+// setInterval(() => {
+//     randomTransform();
+// }, 4000);
 /*
     CSS PRECALCS
 */
-let letterDelays = [0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8];
-shuffleArray(letterDelays);
+// let letterDelays = [0, 0.3, 0.6, 0.9, 1.2, 1.5, 1.8];
+// shuffleArray(letterDelays);
 
-document.querySelectorAll('.wait_text span').forEach((span, idx) => {
+// document.querySelectorAll('.wait_text span').forEach((span, idx) => {
 
-    span.style.animationDelay = `${letterDelays[idx]}s`;
-});
+//     span.style.animationDelay = `${letterDelays[idx]}s`;
+// });
 
 /*
 Debug Flag, wenn activ wird die DBG() Funktion ausgeführt, so kann man schnell global 
@@ -401,9 +427,34 @@ let loadTimeout;
 
 function loadSounds(voiceid)
 {
-    SOUNDS[0] = loadSound(`Samples/PNO/PNO_H_${voiceid+1}.mp3`);
-    SOUNDS[1] = loadSound(`Samples/NOT/NOT_H_${voiceid+1}.mp3`);
-    SOUNDS[2] = loadSound(`Samples/FLT/FLT_H_${voiceid+1}.mp3`);
+
+    SOUNDS[0] = new Howl({
+        src: [`Samples/PNO/PNO_H_${voiceid+1}.mp3`],
+        html5: true,
+        onload: function() {
+            incrementSFLoaded();
+           }
+      }); 
+
+
+    SOUNDS[1] = new Howl({
+        src: [`Samples/NOT/NOT_H_${voiceid+1}.mp3`],
+        html5: true,
+        onload: function() {
+            incrementSFLoaded();
+           }
+    }); 
+
+    SOUNDS[2] = new Howl({
+        src: [`Samples/FLT/FLT_H_${voiceid+1}.mp3`],
+        html5: true,
+        onload: function() {
+            incrementSFLoaded();
+           }
+    }); 
+    // SOUNDS[0] = loadSound(`Samples/PNO/PNO_H_${voiceid+1}.mp3`);
+    // SOUNDS[1] = loadSound(`Samples/NOT/NOT_H_${voiceid+1}.mp3`);
+    // SOUNDS[2] = loadSound(`Samples/FLT/FLT_H_${voiceid+1}.mp3`);
 }
 
 const SoundfilesToLoad = 3;
@@ -464,8 +515,9 @@ connectBtn.onclick = () =>
     if(isConnected)
         return;
 
+    goFullscreen();
     socket.emit("activate");
-    document.getElementById('connect_btn').style.color = "green";
+    // document.getElementById('connect_btn').style.color = "green";
     document.getElementById('connect_btn').innerHTML = "&#10003";
     pulses[0].style.animationIterationCount = "1";
     pulses[1].style.animationIterationCount = "1";
@@ -479,7 +531,7 @@ connectBtn.onclick = () =>
     setTimeout(() => {
         document.getElementById('startscreen').style.display = "none";
         document.getElementById('content').style.display = "flex";
-        goFullscreen();
+     
     }, 1200)
 
     // wakelock
@@ -508,7 +560,15 @@ function goFullscreen()
         } else if (document.documentElement.msRequestFullscreen) { /* IE/Edge */
             document.documentElement.msRequestFullscreen();
         }
+        else
+        {
+            console.log("NO FULLSCREEN SUPPORT");
+        }
     }
+
+
+    // var requestFullScreen = document.documentElement.requestFullscreen || document.documentElement.mozRequestFullScreen || document.documentElement.webkitRequestFullscreen || document.documentElement.msRequestFullscreen;
+    // requestFullScreen.call(document.documentElement);
 }
 
 function detectMobile() {
@@ -553,6 +613,7 @@ function showIncomingChat()
         return;
 
     document.getElementById('incomingchat').style.display = "flex";
+    displayChat();
 }
 
 
@@ -565,7 +626,6 @@ function hideChat()
 incomingchat.addEventListener('click', () => {
     document.getElementById('incomingchat').style.display = "none";
     document.getElementById('chatscreen').style.display = "block";
-    displayChat();
     IsInChat = true;
 });
 
@@ -580,9 +640,9 @@ function createChatMessage(side, repost, msg)
     {
         let header = document.createElement('h1');
         header.classList.add('text-white');
-        header.classList.add('text-2xl');
+        header.classList.add('text-1xl');
         header.classList.add('ml-2');
-        header.textContent = side == 'left' ? 'ZSZUSI' : 'KARL';
+        header.textContent = side == 'left' ? 'ZSUZSI' : 'KARL';
         chatmsg.appendChild(header);
     }
 
@@ -593,7 +653,7 @@ function createChatMessage(side, repost, msg)
     let text = document.createElement('p');
     text.innerHTML = msg;
     text.classList.add('text-black');
-    text.classList.add('text-3xl');
+    text.classList.add('text-1xl');
     
     if(side === 'left')
     {
@@ -629,7 +689,7 @@ let lastMessage;
 function displayChat()
 {
     scheduleChatMessage(0, 'new', 'left', false, 'Miss you babe 😘');
-    scheduleChatMessage(4, 'new', 'right', false, 'Zsuzsi?');
+    scheduleChatMessage(10, 'new', 'right', false, 'Zsuzsi?');
     scheduleChatMessage(2, 'new', 'left', false, '<div class="dots"></div>');
     scheduleChatMessage(4, 'update', 'left', false, 'Last night was so 🐽 💦 😹 😻 ❤️‍🔥');
     scheduleChatMessage(4, 'new', 'right', false, '<div class="dots"></div>');
